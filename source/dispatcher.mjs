@@ -1,8 +1,8 @@
 import path from "path";
+import log from "./log.mjs";
 import ext_map from "./extension_map.mjs";
 import default_dispatch from "./default_dispatch.mjs"
 
-console.log(ext_map);
 /* Routes HTTP request depending on active dispatch modules. */
 const DispatchMap = new Map();
 const DispatchRejectMap = new Map();
@@ -29,22 +29,21 @@ export default async function dispatcher(req, res, meta){
 	let base_key = `${ext_flag.toString(16)}`;
 
 	let dispatch_object = DispatchMap.get(extended_key) || DispatchMap.get(base_key) || default_dispatch;
-	console.log("b", dispatch_object)
+
 	return await respond(dispatch_object, req, res, dir, name, ext, meta)
 }
 
 async function respond(do_, req, res, dir, name, ext, meta, response_code = 200){
-	console.log("AASS",do_)
+
 	switch(do_.response_type){
 
 		case 0:
 			return await do_.respond(req, res, dir, name, ext, meta);
 		case 1:
-		console.log("AAA")
 			res.writeHead(response_code, {'content-type':do_.mime}); 
 			res.end(do_.respond, "utf8",(err)=>{
 				if(err)
-					console.log(err)
+					log.error(err)
 			});
 			return true;
 	}
@@ -88,31 +87,31 @@ function AddCustom(dispatch_object){
 	if(typeof(Respond) !== "function"){
 		if(typeof(Respond) == "string"){
 			if(typeof(dispatch_object.mime) !== "string"){
-				return console.error("Cannot use String based response type without a mime type definitions")
+				return log.error("Cannot use String based response type without a mime type definitions")
 			}
 			dispatch_object.response_type = 1;
 		}else
-			return console.error(e0x101)
+			return log.error(e0x101)
 	}
 
 	if(typeof(Keys) == "undefined")
-		return console.error(e0x102)
+		return log.error(e0x102)
 
 	if(typeof(Name) == "undefined")
-		return console.error(e0x103)
+		return log.error(e0x103)
 
 	if(typeof(Name) !== "string"){
 		if(typeof(Name) == "number"){
 			return AddDefaultDispatch(dispatch_object);
 		}
-		return console.error(e0x104);
+		return log.error(e0x104);
 	}
 
 	const ext = Keys.ext;
 	const dir = Keys.dir;
 
 	if(typeof(ext) !== "number")
-		return console.error("dispatch_object.key.ext must be a numerical value")
+		return log.error("dispatch_object.key.ext must be a numerical value")
 
 	for(let i = 1; i !== 0x10000000; i = (i << 1)){
 		
@@ -140,7 +139,7 @@ function AddDefaultDispatch(dispatch_object){
 	const dir = Keys.dir;
 
 	if(typeof(ext) !== "number")
-		return console.error("dispatch_object.key.ext must be a numerical value")
+		return log.error("dispatch_object.key.ext must be a numerical value")
 
 	for(let i = 1; i !== 0x10000000; i = (i << 1)){
 		

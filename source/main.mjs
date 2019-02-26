@@ -8,12 +8,12 @@ export default function lier(config = {}){
 	config.port = config.port || 80;
 
 	const server = http.createServer(async (request, response) =>{
-		const meta = {};
-		console.log("A")
+		
+		const meta = {authorized:false};
+
 		try{
 				if(!(await dispatcher(request, response, meta))){
 					dispatcher.default(404, request, response, meta)
-				}else{
 				}
 			}catch(e){
 				console.log(e);
@@ -29,3 +29,20 @@ export default function lier(config = {}){
 }
 
 lier.addDispatch = AddDispatch.bind(lier);
+
+/** Defualt responses **/
+
+async function LoadData(){
+	let $404 = (await import("./data/404.data.mjs")).default;
+
+	lier.addDispatch({
+		name: 404,
+		mime: "text/html",
+		respond: $404,
+		keys: {ext:0xFFFFFFFF, dir:"*"}
+	})
+}
+
+LoadData();
+
+

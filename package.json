@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/candlfw/lier.git"
+    "url": "git+https://github.com/candlefw/lier.git"
   },
   "keywords": [
     "CFW"
@@ -16,14 +16,14 @@
   "author": "Anthony Weathersby",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/candlfw/lier/issues"
+    "url": "https://github.com/candlefw/lier/issues"
   },
-  "homepage": "https://github.com/candlfw/lier#readme",
+  "homepage": "https://github.com/candlefw/lier#readme",
   "dependencies": {
-    "@candlefw/radiate": "0.0.7",
-    "@candlefw/wick": "^0.5.8"
+    "@candlefw/radiate": "latest",
+    "@candlefw/wick": "latest"
   },
   "devDependencies": {
-    "@candlefw/hydrocarbon": "0.0.1-a"
+    "@candlefw/hydrocarbon": "latest"
   }
 }
