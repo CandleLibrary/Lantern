@@ -1,0 +1,29 @@
+{
+  "name": "@candlefw/lier",
+  "version": "0.0.1",
+  "description": "Web Server",
+  "main": "source/main.mjs",
+  "scripts": {
+    "test": "node --experimental-modules ./test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/candlfw/lier.git"
+  },
+  "keywords": [
+    "CFW"
+  ],
+  "author": "Anthony Weathersby",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/candlfw/lier/issues"
+  },
+  "homepage": "https://github.com/candlfw/lier#readme",
+  "dependencies": {
+    "@candlefw/radiate": "0.0.7",
+    "@candlefw/wick": "^0.5.8"
+  },
+  "devDependencies": {
+    "@candlefw/hydrocarbon": "0.0.1-a"
+  }
+}
