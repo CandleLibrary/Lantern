@@ -1,7 +1,7 @@
 const default_dispatch = {
-    name: "Defualt Dispatch",
-    respond: async () => false,
-    key: { ext_mask: 0xFFFFFFFF, dir: "." }
+	response_type: 0,
+    name: "Default",
+    respond:  async () => {return false}
 }
 
 export default default_dispatch;

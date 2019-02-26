@@ -2,10 +2,11 @@ import path from "path";
 import log from "./log.mjs";
 import ext_map from "./extension_map.mjs";
 import default_dispatch from "./default_dispatch.mjs"
+import LierTools from "./tools.mjs";
 
 /* Routes HTTP request depending on active dispatch modules. */
 const DispatchMap = new Map();
-const DispatchRejectMap = new Map();
+const DispatchDefaultMap = new Map();
 
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
@@ -13,58 +14,68 @@ const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missi
 const e0x103 = "Dispatch object must have name. Error missing dispatch_object.name.";
 const e0x104 = "Dispatch object name must be a string. Error dispatch_object.name is not a string value.";
 
-/** Root dispatch function **/
-export default async function dispatcher(req, res, meta){
-	
-	// Authenticated
-	const _path = path.parse(req.url);
-	const dir = (_path.dir == "/") ? "" : _path.dir ;
-	const name = _path.name;
-	const ext = _path.ext;
-	let ext_flag = 0; // The "No Extension" value
-	if(ext)
-		ext_flag = ext_map[ext] || 0x80000000; // The "Any Extension" value;
-
-	let extended_key = `${ext_flag.toString(16)}${dir}`;
-	let base_key = `${ext_flag.toString(16)}`;
-
-	let dispatch_object = DispatchMap.get(extended_key) || DispatchMap.get(base_key) || default_dispatch;
-
-	return await respond(dispatch_object, req, res, dir, name, ext, meta)
-}
-
 async function respond(do_, req, res, dir, name, ext, meta, response_code = 200){
-
+	
 	switch(do_.response_type){
 
 		case 0:
-			return await do_.respond(req, res, dir, name, ext, meta);
+			const tools = new LierTools(do_, req, res, meta, name, dir, ext);
+			const result = await do_.respond(tools);
+			tools.destroy();
+			return result;
 		case 1:
-			res.writeHead(response_code, {'content-type':do_.mime}); 
+			res.writeHead(response_code, {'content-type':do_.MIME}); 
 			res.end(do_.respond, "utf8",(err)=>{
 				if(err)
 					log.error(err)
 			});
 			return true;
 	}
+
+	return false
 }
+
+/** Root dispatch function **/
+export default async function dispatcher(req, res, meta){
+	
+	// Authenticated
+	const _path = path.parse(req.url);
+	const dir = (req.url == "/") ? "/" : _path.dir ;
+	const name = _path.name;
+	const ext = _path.ext.slice(1);
+	let ext_flag = 1; // The "No Extension" value
+	if(ext)
+		ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;
+
+	let extended_key = `${ext_flag.toString(16)}${dir}`;
+	let base_key = `${ext_flag.toString(16)}`;
+	let dispatch_object = DispatchMap.get(extended_key) || DispatchMap.get(base_key) || default_dispatch;
+	
+	log.verbose(`Received request for "${req.url}", responding with dispatcher ${dispatch_object.name}`)
+	
+	return await respond(dispatch_object, req, res, dir, name, ext, meta)
+}
+
+
 
 /** Root dispatch function **/
 dispatcher.default = async function(code, req, res, meta){
 	/** Extra Flags **/
 	const _path = path.parse(req.url);
-	const dir = (_path.dir == "/") ? "" : _path.dir ;
+	const dir = (req.url == "/") ? "/" : _path.dir ;
 	const name = _path.name;
-	const ext = _path.ext;
+	const ext = _path.ext.slice(1);
 	let ext_flag = 1; // The "No Extension" value
 	if(ext)
-		ext_flag = ext_map[ext] || 0x80000000; // The "Any Extension" value;	
+		ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;	
 
 	let extended_key = `${ext_flag.toString(16)}${code}${dir}`;
 	let base_key = `${ext_flag.toString(16)}${code}`;
 
-	let dispatch_object = DispatchRejectMap.get(extended_key) || DispatchRejectMap.get(base_key) || default_dispatch;
-
+	let dispatch_object = DispatchDefaultMap.get(extended_key) || DispatchDefaultMap.get(base_key) || default_dispatch;
+	
+	log.verbose(`Responding to request for "${req.url}" with code ${code}, using dispatcher ${dispatch_object.name}`)
+	
 	return await respond(dispatch_object, req, res, dir, name, ext, meta, dispatch_object.name);
 }
 
@@ -86,7 +97,7 @@ function AddCustom(dispatch_object){
 
 	if(typeof(Respond) !== "function"){
 		if(typeof(Respond) == "string"){
-			if(typeof(dispatch_object.mime) !== "string"){
+			if(typeof(dispatch_object.MIME) !== "string"){
 				return log.error("Cannot use String based response type without a mime type definitions")
 			}
 			dispatch_object.response_type = 1;
@@ -151,7 +162,7 @@ function AddDefaultDispatch(dispatch_object){
 				dispatch_key = `${i.toString(16)}${Name}${dir}`;
 			}
 
-			DispatchRejectMap.set(dispatch_key, dispatch_object);
+			DispatchDefaultMap.set(dispatch_key, dispatch_object);
 		}
 	}
 }

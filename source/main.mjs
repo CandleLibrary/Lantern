@@ -1,48 +1,48 @@
 import http from "http";
 import dispatcher from "./dispatcher.mjs";
-import {AddDispatch} from "./dispatcher.mjs";
+import { AddDispatch } from "./dispatcher.mjs";
+import ext_map from "./extension_map.mjs";
 
-export default function lier(config = {}){
+export default function lier(config = {}) {
 
-	//Using port 80 by default
-	config.port = config.port || 80;
+    //Using port 80 by default
+    config.port = config.port || 80;
 
-	const server = http.createServer(async (request, response) =>{
-		
-		const meta = {authorized:false};
+    const server = http.createServer(async (request, response) => {
 
-		try{
-				if(!(await dispatcher(request, response, meta))){
-					dispatcher.default(404, request, response, meta)
-				}
-			}catch(e){
-				console.log(e);
-				dispatcher.default(404, request, response, meta)
-			}
-	})
+        const meta = { authorized: false };
 
-	server.listen(config.port, err =>{
-		if(err)console.error(err);
-	})
+        try {
+            if (!(await dispatcher(request, response, meta))) {
+                dispatcher.default(404, request, response, meta)
+            }
+        } catch (e) {
+            console.log(e);
+            dispatcher.default(404, request, response, meta)
+        }
+    })
 
-	return lier;
+    server.listen(config.port, err => {
+        if (err) console.error(err);
+    })
+
+    return lier;
 }
 
 lier.addDispatch = AddDispatch.bind(lier);
+lier.ext = ext_map;
 
 /** Defualt responses **/
 
-async function LoadData(){
-	let $404 = (await import("./data/404.data.mjs")).default;
+async function LoadData() {
+    let $404 = (await import("./data/404.data.mjs")).default;
 
-	lier.addDispatch({
-		name: 404,
-		mime: "text/html",
-		respond: $404,
-		keys: {ext:0xFFFFFFFF, dir:"*"}
-	})
+    lier.addDispatch({
+        name: 404,
+        MIME: "text/html",
+        respond: $404,
+        keys: { ext: 0xFFFFFFFF, dir: "*" }
+    })
 }
 
 LoadData();
-
-
