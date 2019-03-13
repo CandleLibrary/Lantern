@@ -1,14 +1,17 @@
 {
-  "name": "@candlefw/lier",
+  "name": "@candlefw/lantern",
   "version": "0.0.2",
   "description": "Web Server",
   "main": "source/main.mjs",
+  "bin": {
+    "lantern" : "console.mjs"
+  },
   "scripts": {
     "test": "node --experimental-modules ./test.mjs"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/candlefw/lier.git"
+    "url": "git+https://github.com/candlefw/lantern.git"
   },
   "keywords": [
     "CFW"
@@ -16,9 +19,9 @@
   "author": "Anthony Weathersby",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/candlefw/lier/issues"
+    "url": "https://github.com/candlefw/lantern/issues"
   },
-  "homepage": "https://github.com/candlefw/lier#readme",
+  "homepage": "https://github.com/candlefw/lantern#readme",
   "dependencies": {
     "@candlefw/radiate": "latest",
     "@candlefw/wick": "latest"

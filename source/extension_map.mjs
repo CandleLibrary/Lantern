@@ -19,5 +19,6 @@ const common_extension =
 	
 const ext_map = common_extension.reduce((a, e, i) =>(a[e] = 1<<(i), a), {});
 ext_map.any = 0x80000000;
+ext_map.all = 0xFFFFFFFF
 
 export default ext_map;

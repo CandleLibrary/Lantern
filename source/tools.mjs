@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import log from "./log.mjs";
+import ExtToMIME from "./ext_to_mime.mjs"
 
 const fsp = fs.promises;
 
@@ -47,6 +48,17 @@ export default class LierTools {
         this.res.setHeader("content-type", MIME);
     }
 
+    setMIMEBasedOnExt(){
+    	let MIME = "text/plain"; 
+
+    	if(this.ext) {
+    		let mime = ExtToMIME[this.ext];
+    		if(mime) MIME = mime;
+    	}
+
+    	this.res.setHeader("content-type", MIME);
+    }
+
     setStatusCode(code = 200) {
         this.res.statusCode = (code);
     }
@@ -61,6 +73,11 @@ export default class LierTools {
         }
 
         return true;
+    }
+
+    async sendString(string){
+    	this.res.end(string, "utf8");
+    	return true;
     }
 
     get filename(){
