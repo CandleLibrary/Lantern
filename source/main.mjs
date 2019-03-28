@@ -10,7 +10,7 @@ const script_dir = path.join(new URL(
     import.meta.url).pathname, "../..");
 const fsp = fs.promises;
 
-export default function lier(config = {}) {
+export default function lantern(config = {}) {
 
     //Using port 8080 by default
     config.port = config.port || 8080;
@@ -35,11 +35,11 @@ export default function lier(config = {}) {
         if (err) log.error(err);
     })
 
-    return lier;
+    return lantern;
 }
 
-lier.addDispatch = AddDispatch.bind(lier);
-lier.ext = ext_map;
+lantern.addDispatch = AddDispatch.bind(lantern);
+lantern.ext = ext_map;
 
 /** Defualt responses **/
 
@@ -49,7 +49,7 @@ async function LoadData() {
 
 
 
-    lier.addDispatch({
+    lantern.addDispatch({
         name: 404,
         MIME: "text/html",
         respond: $404,

@@ -4,7 +4,7 @@
   "description": "Web Server",
   "main": "source/main.mjs",
   "bin": {
-    "lantern" : "console.mjs"
+    "lantern": "console.mjs"
   },
   "scripts": {
     "test": "node --experimental-modules ./test.mjs"
@@ -23,8 +23,7 @@
   },
   "homepage": "https://github.com/candlefw/lantern#readme",
   "dependencies": {
-    "@candlefw/radiate": "latest",
-    "@candlefw/wick": "latest"
+    "@candlefw/radiate": "latest"
   },
   "devDependencies": {
     "@candlefw/hydrocarbon": "latest"

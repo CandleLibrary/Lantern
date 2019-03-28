@@ -2,10 +2,10 @@
 
 ":" //# comment; exec /usr/bin/env node --experimental-modules "$0" "$@"
 
-import lier from "./source/main.mjs"
+import lantern from "./source/main.mjs"
 import path from 'path';
 
-lier.addDispatch({
+lantern.addDispatch({
     name: "General",
     MIME: "text/html",
     respond: async function(tools) {
@@ -19,8 +19,8 @@ lier.addDispatch({
         tools.setMIMEBasedOnExt();
         return tools.sendUTF8(path.join(tools.dir, tools.filename));
     },
-    keys: { ext: lier.ext.all, dir: "*" }
+    keys: { ext: lantern.ext.all, dir: "*" }
 })
 
 
-lier({ port: process.env.PORT });
+lantern({ port: process.env.PORT });
