@@ -4,6 +4,7 @@ import fs from "fs";
 import dispatcher from "./dispatcher.mjs";
 import { AddDispatch } from "./dispatcher.mjs";
 import ext_map from "./extension_map.mjs";
+import {addKey} from "./extension_map.mjs";
 import log from "./log.mjs";
 
 const DEV_MODE = true;
@@ -17,7 +18,7 @@ export default function lantern(config = {}) {
     //Using port 8080 by default
     config.port = config.port || 8080;
 
-    log.verbose(`Lier set to listen on port ${config.port}`);
+    log.verbose(`Lantern set to listen on port ${config.port}`);
 
     const server = http.createServer(async (request, response) => {
 
@@ -39,7 +40,7 @@ export default function lantern(config = {}) {
 
     return lantern;
 }
-
+lantern.addExtensionKey = addKey.bind(lantern);
 lantern.addDispatch = AddDispatch.bind(lantern);
 lantern.ext = ext_map;
 
@@ -53,7 +54,7 @@ async function LoadData() {
     if (DEV_MODE) {
         /** DEV MODE FORCES ACTIVE RELOADING OF ALL DEFAULT RESOURCES **/
 
-        lier.addDispatch({
+        lantern.addDispatch({
             name: 404,
             MIME: "text/html",
             respond: (await import("./data/404.data.mjs")).default,
@@ -68,6 +69,15 @@ async function LoadData() {
                     case "wick":
                         tools.setMIME("js");
                         return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/wick/build/wick.js"), "utf8"));
+                    case "glow":
+                        tools.setMIME("js");
+                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/glow/build/glow.js"), "utf8"));
+                    case "html":
+                        tools.setMIME("js");
+                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/html/build/html.js"), "utf8"));
+                    case "css":
+                        tools.setMIME("js");
+                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/css/build/css.js"), "utf8"));
                 }
 
                 return false;
@@ -84,7 +94,7 @@ async function LoadData() {
         } catch (e) { console.error(e) }
 
 
-        lier.addDispatch({
+        lantern.addDispatch({
             name: 404,
             MIME: "text/html",
             respond: $404,
