@@ -29,7 +29,7 @@ export default function lantern(config = {}) {
                 dispatcher.default(404, request, response, meta)
             }
         } catch (e) {
-            log.log(e);
+            log.error(e);
             dispatcher.default(404, request, response, meta)
         }
     })
