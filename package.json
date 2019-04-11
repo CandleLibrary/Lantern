@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.3-a",
+  "version": "0.0.4-a",
   "description": "Web Server",
   "main": "source/main.mjs",
   "bin": {
@@ -23,7 +23,8 @@
   },
   "homepage": "https://github.com/candlefw/lantern#readme",
   "dependencies": {
-    "@candlefw/radiate": "latest"
+    "@candlefw/radiate": "latest",
+    "resolve": "^1.10.0"
   },
   "devDependencies": {
     "@candlefw/hydrocarbon": "latest"

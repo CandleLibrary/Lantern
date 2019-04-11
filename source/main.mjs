@@ -6,11 +6,14 @@ import { AddDispatch } from "./dispatcher.mjs";
 import ext_map from "./extension_map.mjs";
 import {addKey} from "./extension_map.mjs";
 import log from "./log.mjs";
+import resolve from "resolve";
 
 const DEV_MODE = true;
 
-const script_dir = path.join(new URL(
-    import.meta.url).pathname, "../..");
+const script_dir = path.join(process.env.PWD, "./node_modules"); 
+
+/*path.join(new URL(
+    import.meta.url).pathname, "../..");*/
 const fsp = fs.promises;
 
 export default function lantern(config = {}) {
@@ -65,19 +68,19 @@ async function LoadData() {
                 switch (tools.fn) {
                     case "radiate":
                         tools.setMIME("js");
-                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/radiate/build/radiate.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/radiate"), "../../build/radiate.js"), "utf8"));
                     case "wick":
                         tools.setMIME("js");
-                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/wick/build/wick.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/wick"), "../../build/wick.js"), "utf8"));
                     case "glow":
                         tools.setMIME("js");
-                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/glow/build/glow.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/glow"), "../../build/glow.js"), "utf8"));
                     case "html":
                         tools.setMIME("js");
-                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/html/build/html.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/html"), "../../build/html.js"), "utf8"));
                     case "css":
                         tools.setMIME("js");
-                        return tools.sendString(await fsp.readFile(path.join(script_dir, "./node_modules/@candlefw/css/build/css.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/css"), "../../build/css.js"), "utf8"));
                 }
 
                 return false;
