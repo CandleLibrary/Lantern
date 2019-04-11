@@ -7,13 +7,13 @@ const fsp = fs.promises;
 
 const PWD = process.env.PWD;
 
-export default class LierTools {
+export default class LanternTools {
     constructor(distribution_object, req, res, meta, fn, dir, ext) {
         let tool;
 
-        if (LierTools.cache) {
-            tool = LierTools.cache;
-            LierTools.cache = tool.next;
+        if (LanternTools.cache) {
+            tool = LanternTools.cache;
+            LanternTools.cache = tool.next;
         } else {
             tool = this;
         }
@@ -31,8 +31,8 @@ export default class LierTools {
     }
 
     destroy() {
-        this.next = LierTools.cache;
-        LierTools.cache = this;
+        this.next = LanternTools.cache;
+        LanternTools.cache = this;
 
         this.do = null;
         this.res = null;
@@ -63,9 +63,19 @@ export default class LierTools {
         this.res.statusCode = (code);
     }
 
+    async getUTF8(file_path){
+        try {
+            return await fsp.readFile(path.join(PWD, file_path), "utf8");
+        } catch (e) {
+            log.error(e);
+            return "";
+        }
+    }
+
     async sendUTF8(file_path) {
         try {
             let data = await fsp.readFile(path.join(PWD, file_path), "utf8");
+            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher ${this.do.name}`)
             this.res.end(data, "utf8");
         } catch (e) {
             log.error(e);
@@ -85,4 +95,4 @@ export default class LierTools {
     }
 }
 
-LierTools.cache = new LierTools()
+LanternTools.cache = new LanternTools()
