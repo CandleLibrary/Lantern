@@ -21,13 +21,17 @@ export default class LanternTools {
         tool.do = distribution_object;
         tool.req = req;
         tool.res = res;
-        this.meta = meta;
+        tool.meta = meta;
         tool.next = null;
         tool.fn = fn;
         tool.ext = ext;
         tool.dir = dir;
 
         return tool;
+    }
+
+    getCookie(){
+
     }
 
     destroy() {
@@ -48,8 +52,11 @@ export default class LanternTools {
         this.res.setHeader("content-type", MIME);
     }
 
-    setMIMEBasedOnExt(){
-    	let MIME = "text/plain"; 
+    setMIMEBasedOnExt(ext = ""){
+    	let MIME = "text/plain";
+
+        if(!this.ext) 
+            this.ext = ext;
 
     	if(this.ext) {
     		let mime = ExtToMIME[this.ext];
@@ -61,6 +68,21 @@ export default class LanternTools {
 
     setStatusCode(code = 200) {
         this.res.statusCode = (code);
+    }
+
+    setCookie(cookie_name, cookie_value){
+        this.res.setHeader("set-cookie", `${cookie_name}=${cookie_value}`);
+    }
+
+    getHeader(header_name){
+        return this.req.headers[header_name];
+    }
+
+    async redirect(url){
+        this.res.statusCode = 301;
+        this.res.setHeader("location", url);
+        this.res.end();
+        return true;
     }
 
     async getUTF8(file_path){

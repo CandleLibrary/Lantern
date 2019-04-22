@@ -3,6 +3,7 @@ import log from "./log.mjs";
 import ext_map from "./extension_map.mjs";
 import default_dispatch from "./default_dispatch.mjs"
 import LanternTools from "./tools.mjs";
+import url from "url";
 
 /* Routes HTTP request depending on active dispatch modules. */
 const DispatchMap = new Map();
@@ -25,8 +26,8 @@ async function respond(d_objs, req, res, dir, name, ext, meta, response_code = 2
                 const tools = new LanternTools(do_, req, res, meta, name, dir, ext);
                 const result = await do_.respond(tools);
                 tools.destroy();
-                if(result)
-                	return result;
+                if (result)
+                    return result;
                 break;
             case 1:
                 res.writeHead(response_code, { 'content-type': do_.MIME });
@@ -45,7 +46,8 @@ async function respond(d_objs, req, res, dir, name, ext, meta, response_code = 2
 export default async function dispatcher(req, res, meta) {
 
     // Authenticated
-    const _path = path.parse(req.url);
+    const url_path = url.parse(req.url).pathname;
+    const _path = path.parse(url_path);
     const dir = (req.url == "/") ? "/" : _path.dir;
     const name = _path.name;
     const ext = _path.ext.slice(1);
@@ -55,7 +57,21 @@ export default async function dispatcher(req, res, meta) {
 
     let extended_key = `${ext_flag.toString(16)}${dir}`;
     let base_key = `${ext_flag.toString(16)}`;
-    let dispatch_object = DispatchMap.get(extended_key) || DispatchMap.get(base_key) || default_dispatch;
+
+
+    const keys = dir.split("/");
+
+    let dispatch_object = null;
+
+    for (let i = 0; i < keys.length; i++) {
+        let key = `${ext_flag.toString(16)}${keys.slice(0,keys.length-i).join("/")}${i > 0 ? "/*" : "/"}`
+
+        if ((dispatch_object = DispatchMap.get(key)))
+            break
+    }
+
+
+    dispatch_object = dispatch_object || DispatchMap.get(base_key) || default_dispatch;
 
     log.verbose(`Received request for "${req.url}", responding with dispatcher${dispatch_object.length > 1 ? "s": ""} ${dispatch_object.map(d=>d.name).join(", ")}`)
 
@@ -73,7 +89,7 @@ dispatcher.default = async function(code, req, res, meta) {
     const ext = _path.ext.slice(1);
     let ext_flag = 1; // The "No Extension" value
     if (ext)
-        ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;	
+        ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value; 
 
     let extended_key = `${ext_flag.toString(16)}${code}${dir}`;
     let base_key = `${ext_flag.toString(16)}${code}`;
@@ -125,13 +141,29 @@ function AddCustom(dispatch_object) {
     }
 
     const ext = Keys.ext;
-    const dir = Keys.dir;
 
     if (typeof(ext) !== "number")
         return log.error("dispatch_object.key.ext must be a numerical value")
 
-    for (let i = 1; i !== 0x10000000; i = (i << 1)) {
 
+    const dir_array = Keys.dir.split("/");
+
+    const dir = (dir_array[dir_array.length - 1] == "*" || dir_array[dir_array.length - 1] == "") ?
+        Keys.dir :
+        dir_array.concat([""]).join("/");
+
+    if (dir[dir.length - 1] == "*" && dir.length > 1) {
+        SetDispatchMap(dir.slice(0, -1), dispatch_object, ext)
+    }
+
+    SetDispatchMap(dir, dispatch_object, ext);
+
+    return this;
+}
+
+function SetDispatchMap(dir, dispatch_object, ext) {
+    console.log(dir)
+    for (let i = 1; i !== 0x10000000; i = (i << 1)) {
         if ((ext & i)) {
             let dispatch_key;
             if (dir == "*") {
@@ -139,6 +171,7 @@ function AddCustom(dispatch_object) {
             } else {
                 dispatch_key = `${i.toString(16)}${dir}`;
             }
+
             let d = DispatchMap.get(dispatch_key);
 
             if (d) {
@@ -147,8 +180,6 @@ function AddCustom(dispatch_object) {
                 DispatchMap.set(dispatch_key, [dispatch_object]);
         }
     }
-
-    return this;
 }
 
 

@@ -20,8 +20,7 @@ export default function lantern(config = {}) {
 
     //Using port 8080 by default
     config.port = config.port || 8080;
-
-    log.verbose(`Lantern set to listen on port ${config.port}`);
+    log.verbose(`${config.server_name || "Lantern"} set to listen on port ${config.port}`);
 
     const server = http.createServer(async (request, response) => {
 
@@ -67,20 +66,24 @@ async function LoadData() {
             respond: async (tools) => {
                 switch (tools.fn) {
                     case "radiate":
-                        tools.setMIME("js");
+                        tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/radiate"), "../../build/radiate.js"), "utf8"));
                     case "wick":
-                        tools.setMIME("js");
+                        tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/wick"), "../../build/wick.js"), "utf8"));
                     case "glow":
-                        tools.setMIME("js");
+                        tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/glow"), "../../build/glow.js"), "utf8"));
                     case "html":
-                        tools.setMIME("js");
+                        tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/html"), "../../build/html.js"), "utf8"));
                     case "css":
-                        tools.setMIME("js");
+                        tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/css"), "../../build/css.js"), "utf8"));
+                    case "url":
+                        tools.setMIMEBasedOnExt("js");
+                        return tools.sendString(await fsp.readFile(resolve.sync("@candlefw/url"), "utf8"));
+                
                 }
 
                 return false;
