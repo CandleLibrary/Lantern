@@ -4,7 +4,7 @@
   "description": "Web Server",
   "main": "source/main.mjs",
   "bin": {
-    "lantern": "console.mjs"
+    "lantern": "console.js"
   },
   "scripts": {
     "test": "node --experimental-modules ./test.mjs"
