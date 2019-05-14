@@ -4,13 +4,14 @@ import fs from "fs";
 import dispatcher from "./dispatcher.mjs";
 import { AddDispatch } from "./dispatcher.mjs";
 import ext_map from "./extension_map.mjs";
-import {addKey} from "./extension_map.mjs";
+import { addKey } from "./extension_map.mjs";
 import log from "./log.mjs";
 import resolve from "resolve";
 
 const DEV_MODE = true;
+const script_dir = path.join(path.resolve("."), "./node_modules");
+console.log(script_dir)
 
-const script_dir = path.join(process.env.PWD, "./node_modules"); 
 
 /*path.join(new URL(
     import.meta.url).pathname, "../..");*/
@@ -48,6 +49,8 @@ lantern.ext = ext_map;
 
 
 
+let CFW_NODE_DIR = path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")
+console.log(CFW_NODE_DIR, "AA",import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\//g : /file\:\/\//g, ""))
 
 async function LoadData() {
     /** Defualt responses **/
@@ -67,23 +70,23 @@ async function LoadData() {
                 switch (tools.fn) {
                     case "radiate":
                         tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/radiate"), "../../build/radiate.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "radiate/build/radiate.js"), "utf8"));
                     case "wick":
                         tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/wick"), "../../build/wick.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.js"), "utf8"));
                     case "glow":
                         tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/glow"), "../../build/glow.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "glow/build/glow.js"), "utf8"));
                     case "html":
                         tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/html"), "../../build/html.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "html/build/html.js"), "utf8"));
                     case "css":
                         tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(path.join(resolve.sync("@candlefw/css"), "../../build/css.js"), "utf8"));
+                        return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "css/build/css.js"), "utf8"));
                     case "url":
                         tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(resolve.sync("@candlefw/url"), "utf8"));
-                
+                        //return tools.sendString(await fsp.readFile(CFW_NODE_DIR , "url", "utf8"));
+
                 }
 
                 return false;

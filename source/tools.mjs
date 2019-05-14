@@ -5,7 +5,7 @@ import ExtToMIME from "./ext_to_mime.mjs"
 
 const fsp = fs.promises;
 
-const PWD = process.env.PWD;
+const PWD = process.cwd();
 
 export default class LanternTools {
     constructor(distribution_object, req, res, meta, fn, dir, ext) {
@@ -96,9 +96,8 @@ export default class LanternTools {
 
     async sendUTF8(file_path) {
         try {
-            let data = await fsp.readFile(path.join(PWD, file_path), "utf8");
             log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher ${this.do.name}`)
-            this.res.end(data, "utf8");
+            this.res.end(await fsp.readFile(path.join(PWD, file_path), "utf8"), "utf8");
         } catch (e) {
             log.error(e);
             return false;
