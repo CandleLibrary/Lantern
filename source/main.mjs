@@ -74,6 +74,9 @@ async function LoadData() {
                     case "wick":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.js"), "utf8"));
+                    case "flame":
+                        tools.setMIMEBasedOnExt("js");
+                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "flame/build/flame.js"), "utf8"));
                     case "glow":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "glow/build/glow.js"), "utf8"));
@@ -83,6 +86,12 @@ async function LoadData() {
                     case "css":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "css/build/css.js"), "utf8"));
+                    case "js":
+                        tools.setMIMEBasedOnExt("js");
+                        return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "js/build/ecma.js"), "utf8"));
+                    case "ecma":
+                        tools.setMIMEBasedOnExt("js");
+                        return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "js/build/ecma.js"), "utf8"));
                     case "url":
                         tools.setMIMEBasedOnExt("js");
                         //return tools.sendString(await fsp.readFile(CFW_NODE_DIR , "url", "utf8"));
