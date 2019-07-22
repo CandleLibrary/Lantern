@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.6-a",
+  "version": "0.0.7-a",
   "description": "Web Server",
   "main": "source/main.mjs",
   "bin": {
@@ -27,7 +27,6 @@
     "@candlefw/css": "latest",
     "@candlefw/wick": "latest",
     "@candlefw/whind": "latest",
-    "@candlefw/js": "latest",
     "@candlefw/glow": "latest",
     "resolve": "^1.10.0"
   },
