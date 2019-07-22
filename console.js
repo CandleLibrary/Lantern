@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
-const { spawn } = require('child_process'),
-    path = require("path"),
-    runner = spawn("node", ["--experimental-modules", path.resolve(__dirname, "cli.mjs")]);
+const { spawn } = require('child_process');
+
+const path = require("path")
+
+let runner = spawn("node", ["--experimental-modules", path.resolve(__dirname, "cli.mjs")]);
 
 runner.stdout.pipe(process.stdout);
 

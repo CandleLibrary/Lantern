@@ -10,8 +10,6 @@ import resolve from "resolve";
 
 const DEV_MODE = true;
 const script_dir = path.join(path.resolve("."), "./node_modules");
-console.log(script_dir)
-
 
 /*path.join(new URL(
     import.meta.url).pathname, "../..");*/
@@ -43,6 +41,7 @@ export default function lantern(config = {}) {
 
     return lantern;
 }
+
 lantern.addExtensionKey = addKey.bind(lantern);
 lantern.addDispatch = AddDispatch.bind(lantern);
 lantern.ext = ext_map;
@@ -50,7 +49,6 @@ lantern.ext = ext_map;
 
 
 let CFW_NODE_DIR = path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")
-console.log(CFW_NODE_DIR, "AA",import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\//g : /file\:\/\//g, ""))
 
 async function LoadData() {
     /** Defualt responses **/
@@ -58,7 +56,6 @@ async function LoadData() {
 
     if (DEV_MODE) {
         /** DEV MODE FORCES ACTIVE RELOADING OF ALL DEFAULT RESOURCES **/
-
         lantern.addDispatch({
             name: 404,
             MIME: "text/html",
@@ -68,6 +65,9 @@ async function LoadData() {
             name: "CFW Builtins",
             respond: async (tools) => {
                 switch (tools.fn) {
+                    case "flame":
+                        tools.setMIMEBasedOnExt("js");
+                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "flame/build/flame.js"), "utf8"));
                     case "radiate":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "radiate/build/radiate.js"), "utf8"));
