@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.7-a",
+  "version": "0.0.8-a",
   "description": "Web Server",
   "main": "source/main.mjs",
   "bin": {
