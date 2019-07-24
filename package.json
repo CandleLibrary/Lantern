@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.8-a",
+  "version": "0.0.9-0",
   "description": "Web Server",
   "main": "source/main.mjs",
   "bin": {
@@ -23,11 +23,11 @@
   },
   "homepage": "https://github.com/candlefw/lantern#readme",
   "dependencies": {
-    "@candlefw/radiate": "latest",
     "@candlefw/css": "latest",
-    "@candlefw/wick": "latest",
-    "@candlefw/whind": "latest",
     "@candlefw/glow": "latest",
+    "@candlefw/radiate": "latest",
+    "@candlefw/whind": "latest",
+    "@candlefw/wick": "latest",
     "resolve": "^1.10.0"
   },
   "devDependencies": {
