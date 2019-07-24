@@ -15,7 +15,7 @@ const script_dir = path.join(path.resolve("."), "./node_modules");
     import.meta.url).pathname, "../..");*/
 const fsp = fs.promises;
 
-export default function lantern(config = {}) {
+export default function lantern(config = {}, CLI_RUN = false) {
 
     //Using port 8080 by default
     config.port = config.port || 8080;
@@ -39,6 +39,8 @@ export default function lantern(config = {}) {
         if (err) log.error(err);
     })
 
+    loadData(CLI_RUN)
+
     return lantern;
 }
 
@@ -46,11 +48,12 @@ lantern.addExtensionKey = addKey.bind(lantern);
 lantern.addDispatch = AddDispatch.bind(lantern);
 lantern.ext = ext_map;
 
-
-
-let CFW_NODE_DIR = path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")
-
 async function LoadData() {
+
+    let CFW_NODE_DIR = CLI_RUN 
+        ? path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")
+        : path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../../")
+
     /** Defualt responses **/
     let $404, $radiate, $wick;
 
@@ -135,6 +138,3 @@ async function LoadData() {
         })
     }
 }
-
-
-LoadData();

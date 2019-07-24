@@ -19,4 +19,4 @@ lantern.addDispatch({
 })
 
 
-lantern({ port: process.env.PORT });
+lantern({ port: process.env.PORT }, true);
