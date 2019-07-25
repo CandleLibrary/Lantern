@@ -1,13 +1,15 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.10-0",
-  "description": "Web Server",
+  "version": "0.0.11-0",
+  "description": "CFW Web Server",
   "main": "source/main.mjs",
   "bin": {
     "lantern": "console.js"
   },
   "scripts": {
-    "test": "node --experimental-modules ./test.mjs"
+    "test": "mocha -r esm ./test/test.js",
+    "test.watch": "mocha -r esm ./test/test.js -w",
+    "preversion": "yarn test"
   },
   "repository": {
     "type": "git",
@@ -25,12 +27,15 @@
   "dependencies": {
     "@candlefw/css": "latest",
     "@candlefw/glow": "latest",
+    "@candlefw/hydrocarbon": "latest",
     "@candlefw/radiate": "latest",
     "@candlefw/whind": "latest",
     "@candlefw/wick": "latest",
     "resolve": "^1.11.1"
   },
   "devDependencies": {
-    "@candlefw/hydrocarbon": "latest"
+    "chai": "^4.2.0",
+    "esm": "^3.2.25",
+    "mocha": "^6.2.0"
   }
 }
