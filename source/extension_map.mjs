@@ -22,7 +22,7 @@ ext_map.all = 0xFFFFFFFF
 
 let key_offset = common_extension.length;
 
-export function addKey(key){
+export function addKey(key, ext_map){
 	if(!ext_map[key] && key_offset < 31){
 		ext_map[key] = 1<<key_offset++;
 		console.log(`Added new extension ${key} with value ${ext_map[key]}`)

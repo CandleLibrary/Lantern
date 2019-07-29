@@ -47,9 +47,10 @@ export default class LanternTools {
         this.dir = null;
     }
 
-    setMIME(MIME = "text/plain") {
-        MIME = this.do.MIME ? this.do.MIME : MIME;
-        this.res.setHeader("content-type", MIME);
+    setMIME(MIME) {
+        if(MIME ===  undefined)
+            MIME = this.do.MIME ? this.do.MIME : "text/plain";
+        this.res.setHeader("content-type", MIME.toString());
     }
 
     setMIMEBasedOnExt(ext = ""){
@@ -94,11 +95,15 @@ export default class LanternTools {
         }
     }
 
-    async sendRAW(file_path) {
+    async sendRaw(file_path) {
         const loc = path.join(PWD, file_path);
         
         log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher ${this.do.name}`)
         
+
+            //open file stream
+            const stream = fs.createReadStream(loc);
+
         console.log(loc)
         
         stream.on("data", buffer => {
@@ -106,9 +111,6 @@ export default class LanternTools {
         })
 
         return await new Promise(resolve=>{
-            //open file stream
-            const stream = fs.createReadStream(loc);
-
             stream.on("end", ()=>{
                 this.res.end();
 

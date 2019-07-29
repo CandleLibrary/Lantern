@@ -5,9 +5,7 @@ import default_dispatch from "./default_dispatch.mjs"
 import LanternTools from "./tools.mjs";
 import url from "url";
 
-/* Routes HTTP request depending on active dispatch modules. */
-const DispatchMap = new Map();
-const DispatchDefaultMap = new Map();
+
 
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
@@ -43,7 +41,7 @@ async function respond(d_objs, req, res, dir, name, ext, meta, response_code = 2
 }
 
 /** Root dispatch function **/
-export default async function dispatcher(req, res, meta) {
+export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     // Authenticated
     const url_path = url.parse(req.url).pathname;
@@ -81,7 +79,7 @@ export default async function dispatcher(req, res, meta) {
 
 
 /** Root dispatch function **/
-dispatcher.default = async function(code, req, res, meta) {
+dispatcher.default = async function(code, req, res, meta, DispatchDefaultMap, ext_map) {
     /** Extra Flags **/
     const _path = path.parse(req.url);
     const dir = (req.url == "/") ? "/" : _path.dir;
@@ -101,16 +99,16 @@ dispatcher.default = async function(code, req, res, meta) {
     return await respond([dispatch_object], req, res, dir, name, ext, meta, dispatch_object.name);
 }
 
-export function AddDispatch(...dispatch_objects) {
+export function AddDispatch(DispatchMap, DefaultDispatchMap, ...dispatch_objects) {
 
     for (let i = 0, l = dispatch_objects.length; i < l; i++) {
-        AddCustom(dispatch_objects[i]);
+        AddCustom(dispatch_objects[i], DispatchMap, DefaultDispatchMap);
     }
 
     return this;
 }
 
-function AddCustom(dispatch_object) {
+function AddCustom(dispatch_object, DispatchMap, DefaultDispatchMap) {
     let Keys = dispatch_object.keys;
     let Name = dispatch_object.name;
     let Respond = dispatch_object.respond;
@@ -135,7 +133,7 @@ function AddCustom(dispatch_object) {
 
     if (typeof(Name) !== "string") {
         if (typeof(Name) == "number") {
-            return AddDefaultDispatch(dispatch_object);
+            return AddDefaultDispatch(dispatch_object, DefaultDispatchMap);
         }
         return log.error(e0x104);
     }
@@ -153,15 +151,15 @@ function AddCustom(dispatch_object) {
         dir_array.concat([""]).join("/");
 
     if (dir[dir.length - 1] == "*" && dir.length > 1) {
-        SetDispatchMap(dir.slice(0, -1), dispatch_object, ext)
+        SetDispatchMap(dir.slice(0, -1), dispatch_object, ext, DispatchMap)
     }
 
-    SetDispatchMap(dir, dispatch_object, ext);
+    SetDispatchMap(dir, dispatch_object, ext, DispatchMap);
 
     return this;
 }
 
-function SetDispatchMap(dir, dispatch_object, ext) {
+function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
     console.log(dir)
     for (let i = 1; i !== 0x10000000; i = (i << 1)) {
         if ((ext & i)) {
@@ -183,7 +181,7 @@ function SetDispatchMap(dir, dispatch_object, ext) {
 }
 
 
-function AddDefaultDispatch(dispatch_object) {
+function AddDefaultDispatch(dispatch_object, DispatchDefaultMap) {
     let Keys = dispatch_object.keys;
     let Name = dispatch_object.name;
 

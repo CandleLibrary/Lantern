@@ -16,6 +16,9 @@ const script_dir = path.join(path.resolve("."), "./node_modules");
 const fsp = fs.promises;
 
 export default function lantern(config = {}, CLI_RUN = false) {
+    /* Routes HTTP request depending on active dispatch modules. */
+    const DispatchMap = new Map();
+    const DispatchDefaultMap = new Map();
 
     //Using port 8080 by default
     config.port = config.port || 8080;
@@ -27,12 +30,12 @@ export default function lantern(config = {}, CLI_RUN = false) {
         const meta = { authorized: false };
 
         try {
-            if (!(await dispatcher(request, response, meta, DispatchMap))) {
-                dispatcher.default(404, request, response, meta)
+            if (!(await dispatcher(request, response, meta, DispatchMap, ext_map))) {
+                dispatcher.default(404, request, response, meta, DispatchDefaultMap, ext_map)
             }
         } catch (e) {
             log.error(e);
-            dispatcher.default(404, request, response, meta)
+            dispatcher.default(404, request, response, meta, DispatchDefaultMap, ext_map)
         }
     })
 
@@ -41,12 +44,13 @@ export default function lantern(config = {}, CLI_RUN = false) {
     })
 
     const lantern = {}
-    /* Routes HTTP request depending on active dispatch modules. */
-    const DispatchMap = new Map();
-    const DispatchDefaultMap = new Map();
+    
     lantern.server = server;
-    lantern.addExtensionKey = addKey.bind(lantern)
-    lantern.addDispatch = ()=> AddDispatch.bind(lantern)
+    lantern.addExtension =  (key_name)=> addKey(key_name, ext_map)
+
+    const ad = AddDispatch.bind(lantern);
+    lantern.addDispatch = (...v) => ad(DispatchMap, DispatchDefaultMap, ...v)
+    
     lantern.ext = ext_map
 
     loadData(lantern, CLI_RUN)

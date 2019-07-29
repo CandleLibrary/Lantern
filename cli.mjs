@@ -16,7 +16,7 @@ lantern.addDispatch({
 
         tools.setMIMEBasedOnExt();
 
-        return tools.sendRAW(path.join(tools.dir, tools.filename));
+        return tools.sendRaw(path.join(tools.dir, tools.filename));
     },
     keys: { ext: lantern.ext.all, dir: "*" }
 })
