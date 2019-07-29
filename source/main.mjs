@@ -19,6 +19,7 @@ export default function lantern(config = {}, CLI_RUN = false) {
 
     //Using port 8080 by default
     config.port = config.port || 8080;
+
     log.verbose(`${config.server_name || "Lantern"} set to listen on port ${config.port}`);
 
     const server = http.createServer(async (request, response) => {
@@ -26,7 +27,7 @@ export default function lantern(config = {}, CLI_RUN = false) {
         const meta = { authorized: false };
 
         try {
-            if (!(await dispatcher(request, response, meta))) {
+            if (!(await dispatcher(request, response, meta, DispatchMap))) {
                 dispatcher.default(404, request, response, meta)
             }
         } catch (e) {
@@ -39,16 +40,22 @@ export default function lantern(config = {}, CLI_RUN = false) {
         if (err) log.error(err);
     })
 
-    loadData(CLI_RUN)
+    const lantern = {}
+    /* Routes HTTP request depending on active dispatch modules. */
+    const DispatchMap = new Map();
+    const DispatchDefaultMap = new Map();
+    lantern.server = server;
+    lantern.addExtensionKey = addKey.bind(lantern)
+    lantern.addDispatch = ()=> AddDispatch.bind(lantern)
+    lantern.ext = ext_map
 
+    loadData(lantern, CLI_RUN)
+    
     return lantern;
 }
 
-lantern.addExtensionKey = addKey.bind(lantern);
-lantern.addDispatch = AddDispatch.bind(lantern);
-lantern.ext = ext_map;
 
-async function loadData(CLI_RUN) {
+async function loadData(lantern, CLI_RUN = false) {
 
     let CFW_NODE_DIR = CLI_RUN 
         ? path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")

@@ -15,7 +15,8 @@ lantern.addDispatch({
         }
 
         tools.setMIMEBasedOnExt();
-        return tools.sendUTF8(path.join(tools.dir, tools.filename));
+
+        return tools.sendRAW(path.join(tools.dir, tools.filename));
     },
     keys: { ext: lantern.ext.all, dir: "*" }
 })
