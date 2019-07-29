@@ -1,5 +1,7 @@
-import lantern from "./source/main.mjs"
+import runner from "./source/main.mjs"
 import path from 'path';
+
+const lantern = runner({ port: process.env.PORT }, true);
 
 lantern.addDispatch({
     name: "General",
@@ -8,7 +10,7 @@ lantern.addDispatch({
         
         if (!tools.ext) {
             //look for index html;
-         	tools.setMIME();
+            tools.setMIME();
             return tools.sendUTF8(path.join(tools.dir, tools.fn || "", "index.html"))
         }
 
@@ -17,6 +19,3 @@ lantern.addDispatch({
     },
     keys: { ext: lantern.ext.all, dir: "*" }
 })
-
-
-lantern({ port: process.env.PORT }, true);

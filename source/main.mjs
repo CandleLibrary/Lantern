@@ -48,7 +48,7 @@ lantern.addExtensionKey = addKey.bind(lantern);
 lantern.addDispatch = AddDispatch.bind(lantern);
 lantern.ext = ext_map;
 
-async function LoadData() {
+async function loadData(CLI_RUN) {
 
     let CFW_NODE_DIR = CLI_RUN 
         ? path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")
