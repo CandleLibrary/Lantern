@@ -53,6 +53,8 @@ export default function lantern(config = {}, CLI_RUN = false) {
     
     lantern.ext = ext_map
 
+    lantern.close = server.close.bind(server);
+
     loadData(lantern, CLI_RUN)
     
     return lantern;
