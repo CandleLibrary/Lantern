@@ -46,17 +46,17 @@ export default function lantern(config = {}, CLI_RUN = false) {
     const lantern = {}
     
     lantern.server = server;
-    lantern.addExtension =  (key_name)=> addKey(key_name, ext_map)
 
     const ad = AddDispatch.bind(lantern);
+
+    lantern.addExtension =  (key_name)=> addKey(key_name, ext_map)
     lantern.addDispatch = (...v) => ad(DispatchMap, DispatchDefaultMap, ...v)
     
     lantern.ext = ext_map
-
     lantern.close = server.close.bind(server);
 
     loadData(lantern, CLI_RUN)
-    
+
     return lantern;
 }
 

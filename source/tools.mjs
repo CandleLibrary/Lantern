@@ -30,7 +30,7 @@ export default class LanternTools {
         return tool;
     }
 
-    getCookie(){
+    getCookie() {
 
     }
 
@@ -48,45 +48,45 @@ export default class LanternTools {
     }
 
     setMIME(MIME) {
-        if(MIME ===  undefined)
+        if (MIME === undefined)
             MIME = this.do.MIME ? this.do.MIME : "text/plain";
         this.res.setHeader("content-type", MIME.toString());
     }
 
-    setMIMEBasedOnExt(ext = ""){
-    	let MIME = "text/plain";
+    setMIMEBasedOnExt(ext = "") {
+        let MIME = "text/plain";
 
-        if(!this.ext) 
+        if (!this.ext)
             this.ext = ext;
 
-    	if(this.ext) {
-    		let mime = ExtToMIME[this.ext];
-    		if(mime) MIME = mime;
-    	}
+        if (this.ext) {
+            let mime = ExtToMIME[this.ext];
+            if (mime) MIME = mime;
+        }
 
-    	this.res.setHeader("content-type", MIME);
+        this.res.setHeader("content-type", MIME);
     }
 
     setStatusCode(code = 200) {
         this.res.statusCode = (code);
     }
 
-    setCookie(cookie_name, cookie_value){
+    setCookie(cookie_name, cookie_value) {
         this.res.setHeader("set-cookie", `${cookie_name}=${cookie_value}`);
     }
 
-    getHeader(header_name){
+    getHeader(header_name) {
         return this.req.headers[header_name];
     }
 
-    async redirect(url){
+    async redirect(url) {
         this.res.statusCode = 301;
         this.res.setHeader("location", url);
         this.res.end();
         return true;
     }
 
-    async getUTF8(file_path){
+    async getUTF8(file_path) {
         try {
             return await fsp.readFile(path.join(PWD, file_path), "utf8");
         } catch (e) {
@@ -97,27 +97,34 @@ export default class LanternTools {
 
     async sendRaw(file_path) {
         const loc = path.join(PWD, file_path);
-        
+
         log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher ${this.do.name}`)
-        
 
-            //open file stream
-            const stream = fs.createReadStream(loc);
+        //open file stream
 
-        console.log(loc)
-        
+
+        const stream = fs.createReadStream(loc);
+
+
         stream.on("data", buffer => {
             this.res.write(buffer);
         })
 
-        return await new Promise(resolve=>{
-            stream.on("end", ()=>{
-                this.res.end();
+        console.log("file path", file_path)
 
+        return await (new Promise(resolve => {
+            stream.on("end", () => {
+                this.res.end();
                 resolve(true);
             })
+            stream.on("error", e => {
+                console.log(e);
+                this.res.end();
+                resolve(false);
+            })
+        })).catch(e => {
+            console.log("thrown:1", e)
         })
-
     }
 
     async sendUTF8(file_path) {
@@ -132,13 +139,13 @@ export default class LanternTools {
         return true;
     }
 
-    async sendString(string){
-    	this.res.end(string, "utf8");
-    	return true;
+    async sendString(string) {
+        this.res.end(string, "utf8");
+        return true;
     }
 
-    get filename(){
-    	return ([this.fn, ".", this.ext]).join("");
+    get filename() {
+        return ([this.fn, ".", this.ext]).join("");
     }
 }
 
