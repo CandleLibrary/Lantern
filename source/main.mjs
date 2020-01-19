@@ -44,14 +44,14 @@ export default function lantern(config = {}, CLI_RUN = false) {
     })
 
     const lantern = {}
-    
+
     lantern.server = server;
 
     const ad = AddDispatch.bind(lantern);
 
-    lantern.addExtension =  (key_name)=> addKey(key_name, ext_map)
+    lantern.addExtension = (key_name) => addKey(key_name, ext_map)
     lantern.addDispatch = (...v) => ad(DispatchMap, DispatchDefaultMap, ...v)
-    
+
     lantern.ext = ext_map
     lantern.close = server.close.bind(server);
 
@@ -60,12 +60,37 @@ export default function lantern(config = {}, CLI_RUN = false) {
     return lantern;
 }
 
+const lantern_poller = {
+    name: "Auto-Load-Poller Loader",
+    description: "Sends a poller js files that automatically polls the" +
+        "server to see if a file, or files, have been changed," +
+        "and then reloads the page`",
+    keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/" },
+    MIME: " application/ecmascript",
+    respond: (tools) => {
+
+        const rate = 500;
+
+        tools.setMIME();
+
+        return tools.sendString(`
+            import URL from "/cfw/url";
+                    const url = new URL("/lantern-poll/poll");
+                    setInterval(async function() {
+                        if((await url.fetchJSON()).result = "UPDATED")
+                            window.document.reload();
+                    }, ${rate});
+                `)
+    }
+}
 
 async function loadData(lantern, CLI_RUN = false) {
 
-    let CFW_NODE_DIR = CLI_RUN 
-        ? path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")
-        : path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../../")
+    let CFW_NODE_DIR = CLI_RUN
+        ? path.resolve(
+            import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../node_modules/@candlefw")
+        : path.resolve(
+            import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../../")
 
     /** Defualt responses **/
     let $404, $radiate, $wick;
@@ -90,9 +115,6 @@ async function loadData(lantern, CLI_RUN = false) {
                     case "wick":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.js"), "utf8"));
-                    case "flame":
-                        tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "flame/build/flame.js"), "utf8"));
                     case "glow":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "glow/build/glow.js"), "utf8"));
@@ -103,22 +125,18 @@ async function loadData(lantern, CLI_RUN = false) {
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "css/build/css.js"), "utf8"));
                     case "js":
-                        tools.setMIMEBasedOnExt("js");
-                        return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "js/build/ecma.js"), "utf8"));
                     case "ecma":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "js/build/ecma.js"), "utf8"));
                     case "url":
                         tools.setMIMEBasedOnExt("js");
-                        //return tools.sendString(await fsp.readFile(CFW_NODE_DIR , "url", "utf8"));
-
+                        return tools.sendString(await fsp.readFile(path.join(CFW_NODE_DIR, "url/build/url.js"), "utf8"));
                 }
 
                 return false;
             },
             keys: { ext: 0x1, dir: "/cfw" }
-
-        })
+        }, lantern_poller)
     } else {
 
         try {
@@ -148,6 +166,8 @@ async function loadData(lantern, CLI_RUN = false) {
                 return false;
             },
             keys: { ext: 0x1, dir: "/cfw" }
-        })
+        }, lantern_poller)
+
+
     }
 }

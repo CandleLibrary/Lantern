@@ -3,7 +3,7 @@ import log from "./log.mjs";
 import ext_map from "./extension_map.mjs";
 import default_dispatch from "./default_dispatch.mjs"
 import LanternTools from "./tools.mjs";
-import url from "url";
+import URL from "@candlefw/url";
 
 
 
@@ -44,18 +44,24 @@ async function respond(d_objs, req, res, dir, name, ext, meta, response_code = 2
 export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     // Authenticated
-    const url_path = url.parse(req.url).pathname;
-    const _path = path.parse(url_path);
-    const dir = (req.url == "/") ? "/" : _path.dir;
-    const name = _path.name;
-    const ext = _path.ext.slice(1);
+    const url = new URL(req.url);
+
+    const _path = path.parse(url.pathname);
+
+    const dir =  (url.dir == "/") ? "/" : url.dir ;
+
+    const name = url.filename;
+
+    const ext = url.ext;
+
     let ext_flag = 1; // The "No Extension" value
+    
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;
 
     let extended_key = `${ext_flag.toString(16)}${dir}`;
+    
     let base_key = `${ext_flag.toString(16)}`;
-
 
     const keys = dir.split("/");
 
@@ -63,15 +69,13 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     for (let i = 0; i < keys.length; i++) {
         let key = `${ext_flag.toString(16)}${keys.slice(0,keys.length-i).join("/")}${i > 0 ? "/*" : "/"}`
-
         if ((dispatch_object = DispatchMap.get(key)))
             break
     }
 
-
     dispatch_object = dispatch_object || DispatchMap.get(base_key) || default_dispatch;
 
-    log.verbose(`Received request for "${req.url}", responding with dispatcher${dispatch_object.length > 1 ? "s": ""} ${dispatch_object.map(d=>d.name).join(", ")}`)
+    log.verbose(`Received request for "${req.url}", responding with dispatcher${dispatch_object.length > 1 ? "s": ""} [${dispatch_object.map(d=>d.name).join(", ")}]`)
 
     return await respond(dispatch_object, req, res, dir, name, ext, meta)
 }
@@ -94,7 +98,7 @@ dispatcher.default = async function(code, req, res, meta, DispatchDefaultMap, ex
 
     let dispatch_object = DispatchDefaultMap.get(extended_key) || DispatchDefaultMap.get(base_key) || default_dispatch;
 
-    log.verbose(`Responding to request for "${req.url}" with code ${code}, using dispatcher ${dispatch_object.name}`)
+    log.verbose(`Responding to request for "${req.url}" with code ${code}, using dispatcher [${dispatch_object.name}]`)
 
     return await respond([dispatch_object], req, res, dir, name, ext, meta, dispatch_object.name);
 }
@@ -156,11 +160,13 @@ function AddCustom(dispatch_object, DispatchMap, DefaultDispatchMap) {
 
     SetDispatchMap(dir, dispatch_object, ext, DispatchMap);
 
+    log(`Added Dispatch [${dispatch_object.name}]: \n   ${dispatch_object.description ? dispatch_object.description : "No Description"}`)
+
     return this;
 }
 
 function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
-    console.log(dir)
+
     for (let i = 1; i !== 0x10000000; i = (i << 1)) {
         if ((ext & i)) {
             let dispatch_key;
@@ -179,7 +185,6 @@ function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
         }
     }
 }
-
 
 function AddDefaultDispatch(dispatch_object, DispatchDefaultMap) {
     let Keys = dispatch_object.keys;

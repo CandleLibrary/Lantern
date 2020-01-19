@@ -98,7 +98,7 @@ export default class LanternTools {
     async sendRaw(file_path) {
         const loc = path.join(PWD, file_path);
 
-        log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher ${this.do.name}`)
+        log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher [${this.do.name}]`)
 
         //open file stream
 
@@ -109,8 +109,6 @@ export default class LanternTools {
         stream.on("data", buffer => {
             this.res.write(buffer);
         })
-
-        console.log("file path", file_path)
 
         return await (new Promise(resolve => {
             stream.on("end", () => {
@@ -129,7 +127,7 @@ export default class LanternTools {
 
     async sendUTF8(file_path) {
         try {
-            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher ${this.do.name}`)
+            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher [${this.do.name}]`)
             this.res.end(await fsp.readFile(path.join(PWD, file_path), "utf8"), "utf8");
         } catch (e) {
             log.error(e);

@@ -1,5 +1,6 @@
-export default {
-	error:(...m)=>{console.error(...m)},
-	verbose:(...m)=>{console.log(...m)},
-	message:(...m)=>{console.log(...m)}
-}
+const log = (...m) => { console.log(...m, "\n") };
+log.error = (...m) => { console.error(...m, "\n") };
+log.verbose = (...m) => { console.log(...m, "\n") };
+log.message = log;
+
+export default log;
