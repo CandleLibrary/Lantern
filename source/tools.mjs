@@ -8,7 +8,7 @@ const fsp = fs.promises;
 const PWD = process.cwd();
 
 export default class LanternTools {
-    constructor(distribution_object, req, res, meta, fn, dir, ext) {
+    constructor(distribution_object, req, res, meta, url) {
         let tool;
 
         if (LanternTools.cache) {
@@ -23,11 +23,47 @@ export default class LanternTools {
         tool.res = res;
         tool.meta = meta;
         tool.next = null;
-        tool.fn = fn;
-        tool.ext = ext;
-        tool.dir = dir;
+        tool.url = url;
+        tool.ext = (url) ? url.ext : "";
+        tool.data = null;
 
         return tool;
+    }
+
+    async readData() {
+
+        if(this.data)
+            return this.data;
+
+        return new Promise(res => {
+
+            const req = this.req;
+
+            let body = "";
+
+            req.setEncoding('utf8');
+
+            req.on("data", d => {
+                body += d;
+            })
+
+            req.on("end",()=>{
+                this.data = body;
+                res();   
+            });
+        })
+    }
+
+    async getJSONasObject() {
+        const data = await this.readData();
+
+        try {
+            if (this.data)
+                return JSON.parse(this.data)
+        } catch (e) {
+            log.error(e);
+            return {};
+        }
     }
 
     getCookie() {
@@ -42,9 +78,7 @@ export default class LanternTools {
         this.res = null;
         this.req = null;
         this.meta = null;
-        this.fn = null;
-        this.ext = null;
-        this.dir = null;
+        this.url = null;
     }
 
     setMIME(MIME) {
@@ -143,7 +177,32 @@ export default class LanternTools {
     }
 
     get filename() {
-        return ([this.fn, ".", this.ext]).join("");
+        return this.url.filename;
+    }
+
+    get file() {
+        return this.url.file;
+    }
+
+    get pathname() {
+        return this.url.pathname;
+    }
+
+    get dir() {
+        return this.url.dir;
+    }
+
+    async respond(){
+
+        let DISPATCH_SUCCESSFUL = false;
+
+        try{
+            DISPATCH_SUCCESSFUL  = await this.do.respond(this);
+        }catch(e){
+            log.error(`Response with dispatcher [${this.do.name}] failed: \n${e}`);
+        }
+
+        return DISPATCH_SUCCESSFUL;
     }
 }
 

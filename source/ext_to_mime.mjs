@@ -2,6 +2,6 @@ export default {
 	html : "text/html",
 	css : "text/css",
 	json : "application/json",
-	js : "text/javascript",
+	js : "application/javascript",
 	jpg: "image/jpeg",
 }

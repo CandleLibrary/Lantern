@@ -13,7 +13,7 @@ const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missi
 const e0x103 = "Dispatch object must have name. Error missing dispatch_object.name.";
 const e0x104 = "Dispatch object name must be a string. Error dispatch_object.name is not a string value.";
 
-async function respond(d_objs, req, res, dir, name, ext, meta, response_code = 200) {
+async function respond(d_objs, req, res, url, meta, response_code = 200) {
 
     for (let i = 0; i < d_objs.length; i++) {
         let do_ = d_objs[i];
@@ -21,8 +21,8 @@ async function respond(d_objs, req, res, dir, name, ext, meta, response_code = 2
         switch (do_.response_type) {
 
             case 0:
-                const tools = new LanternTools(do_, req, res, meta, name, dir, ext);
-                const result = await do_.respond(tools);
+                const tools = new LanternTools(do_, req, res, meta, url);
+                const result = await tools.respond();
                 tools.destroy();
                 if (result)
                     return result;
@@ -77,7 +77,7 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     log.verbose(`Received request for "${req.url}", responding with dispatcher${dispatch_object.length > 1 ? "s": ""} [${dispatch_object.map(d=>d.name).join(", ")}]`)
 
-    return await respond(dispatch_object, req, res, dir, name, ext, meta)
+    return await respond(dispatch_object, req, res, url, meta)
 }
 
 
@@ -85,10 +85,13 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 /** Root dispatch function **/
 dispatcher.default = async function(code, req, res, meta, DispatchDefaultMap, ext_map) {
     /** Extra Flags **/
-    const _path = path.parse(req.url);
-    const dir = (req.url == "/") ? "/" : _path.dir;
-    const name = _path.name;
-    const ext = _path.ext.slice(1);
+    const url = new URL(req.url);
+
+    const _path = path.parse(url.pathname);
+    const dir =  (url.dir == "/") ? "/" : url.dir ;
+    const name = url.filename;
+    const ext = url.ext;
+
     let ext_flag = 1; // The "No Extension" value
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value; 
@@ -100,7 +103,7 @@ dispatcher.default = async function(code, req, res, meta, DispatchDefaultMap, ex
 
     log.verbose(`Responding to request for "${req.url}" with code ${code}, using dispatcher [${dispatch_object.name}]`)
 
-    return await respond([dispatch_object], req, res, dir, name, ext, meta, dispatch_object.name);
+    return await respond([dispatch_object], req, res, url, meta);
 }
 
 export function AddDispatch(DispatchMap, DefaultDispatchMap, ...dispatch_objects) {

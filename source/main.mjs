@@ -60,29 +60,6 @@ export default function lantern(config = {}, CLI_RUN = false) {
     return lantern;
 }
 
-const lantern_poller = {
-    name: "Auto-Load-Poller Loader",
-    description: "Sends a poller js files that automatically polls the" +
-        "server to see if a file, or files, have been changed," +
-        "and then reloads the page`",
-    keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/" },
-    MIME: " application/ecmascript",
-    respond: (tools) => {
-
-        const rate = 500;
-
-        tools.setMIME();
-
-        return tools.sendString(`
-            import URL from "/cfw/url";
-                    const url = new URL("/lantern-poll/poll");
-                    setInterval(async function() {
-                        if((await url.fetchJSON()).result = "UPDATED")
-                            window.document.reload();
-                    }, ${rate});
-                `)
-    }
-}
 
 async function loadData(lantern, CLI_RUN = false) {
 
@@ -105,7 +82,7 @@ async function loadData(lantern, CLI_RUN = false) {
         }, {
             name: "CFW Builtins",
             respond: async (tools) => {
-                switch (tools.fn) {
+                switch (tools.filename) {
                     case "flame":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "flame/build/flame.js"), "utf8"));
@@ -136,7 +113,7 @@ async function loadData(lantern, CLI_RUN = false) {
                 return false;
             },
             keys: { ext: 0x1, dir: "/cfw" }
-        }, lantern_poller)
+        })
     } else {
 
         try {
@@ -166,8 +143,6 @@ async function loadData(lantern, CLI_RUN = false) {
                 return false;
             },
             keys: { ext: 0x1, dir: "/cfw" }
-        }, lantern_poller)
-
-
+        })
     }
 }
