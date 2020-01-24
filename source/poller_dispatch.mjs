@@ -2,33 +2,47 @@ const pollerCache = new Map();
 import fs from "fs";
 import log from "./log.mjs";
 
-console.log(pollerCache)
-
 export default {
     name: "Auto-Load-Poller Loader",
-    description: "Sends a poller js files that automatically polls the" +
-        "server to see if a file, or files, have been changed," +
-        "and then reloads the page`",
+    description: "Sends a poller js file that automatically polls the" +
+        "server to see if a files in specified directories have been changed," +
+        "and then reloads the page if changes have occured.",
     keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/" },
     MIME: " application/ecmascript",
     respond: async (tools) => {
-        const url = tools.dir.replace("/lantern-poll", "./")
+        const url = tools.url;
+        const ID = url.query;
 
-        if (!pollerCache.has(url)) {
+        if (ID && !pollerCache.has(ID)) {
+            
+            pollerCache.set(ID, false);
 
-            log(`Preparing watch for dir ${url}`);
+            const e = e => pollerCache.set(ID, true);
 
-            pollerCache.set(url, false);
+            if(url.query){
+                for(const path of url.query.split(";")){
+                    try{
+                        log(`Preparing watch for dir ${path}`);
+                        fs.watch(path, { recursive: true, persistent: false }, e);
+                    }catch(e){
+                        tools.setMIME();
+                        return tools.sendString(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`)
+                    }
+                }
+            }else{
+                log(`Preparing watch for dir ${"./"}`);
+                fs.watch("./", { recursive: true, persistent: false }, e);
+            }
 
-            fs.watch(url, { recursive: true, persistent: false }, e => pollerCache.set(url, true))
         }
 
         if (tools.filename == "poll") {
 
             const data = await tools.getJSONasObject();
-            const index = data.id;
-            const result = pollerCache.get(index);
-            pollerCache.set(index, false)
+            const ID = data.id;
+            const result = pollerCache.get(ID);
+            
+            pollerCache.set(ID, false)
 
             tools.setMIMEBasedOnExt("json");
 
@@ -43,8 +57,7 @@ export default {
                 import URL from "/cfw/url";
                     const url = new URL("/lantern-poll/poll");
                     setInterval(async function() {
-                        console.log()
-                        if((await url.submitJSON({id:"${url}"})).UPDATED){
+                        if((await url.submitJSON({id:"${ID}"})).UPDATED){
                             location.reload(true);
                         }
                     }, ${rate});
