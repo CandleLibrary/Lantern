@@ -78,9 +78,26 @@ async function loadData(lantern, CLI_RUN = false) {
             name: 404,
             MIME: "text/html",
             respond: (await import("./data/404.data.mjs")).default,
+            
             keys: { ext: 0xFFFFFFFF, dir: "*" }
         }, {
-            name: "CFW Builtins",
+            name: "CFW Builtins DEV",
+            description: 
+`Serves CandleFW libraries from the virtual directory [cfw]
+    
+    Available libraries:
+        Library :   src name
+        ______________________
+        FLAME   :   cfw/flame
+        RADIATE :   cfw/radiate
+        WICK    :   cfw/wick
+                    cfw/wick.lite
+        GLOW    :   cfw/glow
+        URL     :   cfw/url
+        HTML    :   cfw/html
+        CSS     :   cfw/css
+        JS      :   cfw/js
+                    cfw/ecma`,
             respond: async (tools) => {
                 switch (tools.filename) {
                     case "flame":
@@ -92,6 +109,9 @@ async function loadData(lantern, CLI_RUN = false) {
                     case "wick":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.js"), "utf8"));
+                    case "wicklite":
+                        tools.setMIMEBasedOnExt("js");
+                        return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.lite.js"), "utf8"));
                     case "glow":
                         tools.setMIMEBasedOnExt("js");
                         return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "glow/build/glow.js"), "utf8"));
