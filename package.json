@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "CFW Web Server",
   "main": "source/main.mjs",
   "bin": {
@@ -36,6 +36,6 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "esm": "^3.2.25",
-    "mocha": "^6.2.0"
+    "mocha": "^7.0.1"
   }
 }
