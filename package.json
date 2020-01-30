@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "CFW Web Server",
   "main": "source/main.mjs",
   "bin": {
