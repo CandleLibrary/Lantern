@@ -192,6 +192,12 @@ export default class LanternTools {
         return this.url.dir;
     }
 
+    redirect(new_url){
+        this.res.writeHead(301, {Location: new_url + ""})
+        this.res.end();
+        return true;
+    }
+
     async respond(){
 
         let DISPATCH_SUCCESSFUL = false;

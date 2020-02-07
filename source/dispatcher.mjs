@@ -1,7 +1,7 @@
 import path from "path";
 import log from "./log.mjs";
 import ext_map from "./extension_map.mjs";
-import default_dispatch from "./default_dispatch.mjs"
+import default_dispatch from "./dispatchers/default_dispatch.mjs"
 import LanternTools from "./tools.mjs";
 import URL from "@candlefw/url";
 
@@ -129,20 +129,20 @@ function AddCustom(dispatch_object, DispatchMap, DefaultDispatchMap) {
             }
             dispatch_object.response_type = 1;
         } else
-            return log.error(e0x101)
+            return log.error(`[${Name}] ${e0x101}`)
     }
 
     if (typeof(Keys) == "undefined")
-        return log.error(e0x102)
+        return log.error(`[${Name}] ${e0x102}`)
 
     if (typeof(Name) == "undefined")
-        return log.error(e0x103)
+        return log.error(`[${Name}] ${e0x103}`)
 
     if (typeof(Name) !== "string") {
         if (typeof(Name) == "number") {
             return AddDefaultDispatch(dispatch_object, DefaultDispatchMap);
         }
-        return log.error(e0x104);
+        return log.error(`[${Name}] ${e0x104}`);
     }
 
     const ext = Keys.ext;
