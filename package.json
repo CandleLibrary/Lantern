@@ -3,8 +3,9 @@
   "version": "0.0.12",
   "description": "CFW Web Server",
   "main": "source/main.mjs",
+  "type":"module",
   "bin": {
-    "lantern": "console.js"
+    "lantern": "cli.js"
   },
   "scripts": {
     "test": "mocha -r esm ./test/test.js",
