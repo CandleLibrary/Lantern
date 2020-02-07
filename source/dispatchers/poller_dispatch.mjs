@@ -1,6 +1,6 @@
 const pollerCache = new Map();
 import fs from "fs";
-import log from "./log.mjs";
+import log from "../log.mjs";
 
 export default {
     name: "Auto-Load-Poller Loader",
