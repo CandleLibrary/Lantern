@@ -5,8 +5,6 @@ import default_dispatch from "./dispatchers/default_dispatch.mjs"
 import LanternTools from "./tools.mjs";
 import URL from "@candlefw/url";
 
-
-
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
 const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missing dispatch_object.keys.";
@@ -28,7 +26,8 @@ async function respond(d_objs, req, res, url, meta, response_code = 200) {
                     return result;
                 break;
             case 1:
-                res.writeHead(response_code, { 'content-type': do_.MIME });
+                res.statusCode = (do_.rcode || 200);
+                res.setHeader('content-type', do_.MIME );
                 res.end(do_.respond, "utf8", (err) => {
                     if (err)
                         log.error(err)
@@ -48,19 +47,19 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     const _path = path.parse(url.pathname);
 
-    const dir =  (url.dir == "/") ? "/" : url.dir ;
+    const dir = (url.dir == "/") ? "/" : url.dir;
 
     const name = url.filename;
 
     const ext = url.ext;
 
     let ext_flag = 1; // The "No Extension" value
-    
+
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;
 
     let extended_key = `${ext_flag.toString(16)}${dir}`;
-    
+
     let base_key = `${ext_flag.toString(16)}`;
 
     const keys = dir.split("/");
@@ -75,7 +74,16 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     dispatch_object = dispatch_object || DispatchMap.get(base_key) || default_dispatch;
 
-    log.verbose(`Received request for "${req.url}", responding with dispatcher${dispatch_object.length > 1 ? "s": ""} [${dispatch_object.map(d=>d.name).join(", ")}]`)
+    for (const dsp of dispatch_object) {
+        if (typeof(dsp.SILENT) == "number") {
+            dsp.SILENT++;
+            if (dsp.SILENT > 100) {
+                log.verbose(`received[${100}] times: Received request for "${req.url}", responding with dispatcher [${dsp.name}]`)
+                dsp.SILENT = 0;
+            }
+        } else
+             log.verbose(`Received request for "${req.url}", responding with dispatcher [${dsp.name}]`)
+    }
 
     return await respond(dispatch_object, req, res, url, meta)
 }
@@ -88,7 +96,7 @@ dispatcher.default = async function(code, req, res, meta, DispatchDefaultMap, ex
     const url = new URL(req.url);
 
     const _path = path.parse(url.pathname);
-    const dir =  (url.dir == "/") ? "/" : url.dir ;
+    const dir = (url.dir == "/") ? "/" : url.dir;
     const name = url.filename;
     const ext = url.ext;
 

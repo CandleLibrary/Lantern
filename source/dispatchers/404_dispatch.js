@@ -1,7 +1,8 @@
 import data from "../data/404.data.mjs";
 
 export default {
-    name: 404,
+    name: "404",
+    rcode: 404,
     MIME: "text/html",
     respond: data,
     keys:

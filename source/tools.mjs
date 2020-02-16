@@ -30,6 +30,16 @@ export default class LanternTools {
         return tool;
     }
 
+    destroy() {
+        this.next = LanternTools.cache;
+        LanternTools.cache = this;
+        this.do = null;
+        this.res = null;
+        this.req = null;
+        this.meta = null;
+        this.url = null;
+    }
+
     async readData() {
 
         if(this.data)
@@ -68,17 +78,6 @@ export default class LanternTools {
 
     getCookie() {
 
-    }
-
-    destroy() {
-        this.next = LanternTools.cache;
-        LanternTools.cache = this;
-
-        this.do = null;
-        this.res = null;
-        this.req = null;
-        this.meta = null;
-        this.url = null;
     }
 
     setMIME(MIME) {
@@ -150,8 +149,6 @@ export default class LanternTools {
                 resolve(true);
             })
             stream.on("error", e => {
-                console.log(e);
-                this.res.end();
                 resolve(false);
             })
         })).catch(e => {
@@ -164,7 +161,6 @@ export default class LanternTools {
             log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher [${this.do.name}]`)
             this.res.end(await fsp.readFile(path.join(PWD, file_path), "utf8"), "utf8");
         } catch (e) {
-            log.error(e);
             return false;
         }
 
@@ -205,7 +201,7 @@ export default class LanternTools {
         try{
             DISPATCH_SUCCESSFUL  = await this.do.respond(this);
         }catch(e){
-            log.error(`Response with dispatcher [${this.do.name}] failed: \n${e}`);
+            log.error(`Response with dispatcher [${this.do.name}] failed: \n${e.stack}`);
         }
 
         return DISPATCH_SUCCESSFUL;
