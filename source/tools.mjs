@@ -206,6 +206,11 @@ export default class LanternTools {
 
         return DISPATCH_SUCCESSFUL;
     }
+
+    error(error){
+        console.log(error);
+        return false;
+    }
 }
 
 LanternTools.cache = new LanternTools()
