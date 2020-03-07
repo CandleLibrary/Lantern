@@ -31,7 +31,7 @@
     "@candlefw/hydrocarbon": "0.1.7",
     "@candlefw/radiate": "0.2.0",
     "@candlefw/whind": "0.3.6-uni-id.0",
-    "@candlefw/wick": "0.8.12",
+    "@candlefw/wick": "0.8.13",
     "node-watch": "^0.6.3",
     "resolve": "^1.15.1"
   },
