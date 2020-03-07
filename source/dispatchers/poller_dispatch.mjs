@@ -34,9 +34,17 @@ function watchPath(ID) {
 
 export default {
     name: "Auto-Load-Poller Loader",
-    description: "Sends a poller js file that automatically polls the" +
-        "server to see if a files in specified directories have been changed," +
-        "and then reloads the page if changes have occured.",
+    description: 
+`Sends a poller js file that automatically polls the server to see 
+if files in specified directories have been changed, and then reloads 
+the page if changes have occured. 
+
+To use, add to the HTML head tag: 
+    
+    <script type="module" src="/lantern-poll/?{dirs}"></script>
+
+where {dirs} is a list of domain directories separated by semicolon
+[;].`,
     keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/" },
     SILENT:0,
     MIME: " application/ecmascript",
