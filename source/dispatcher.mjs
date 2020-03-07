@@ -171,7 +171,9 @@ function AddCustom(dispatch_object, DispatchMap, DefaultDispatchMap) {
 
     SetDispatchMap(dir, dispatch_object, ext, DispatchMap);
 
-    log(`Added Dispatch [${dispatch_object.name}]: \n   ${dispatch_object.description ? dispatch_object.description : "No Description"}`)
+    const width = process.stdout.columns-1;
+
+    log(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`)
 
     return this;
 }
