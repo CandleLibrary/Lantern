@@ -1,7 +1,6 @@
 import path from "path";
 import log from "./log.mjs";
-import ext_map from "./extension_map.mjs";
-import default_dispatch from "./dispatchers/default_dispatch.mjs"
+import default_dispatch from "./dispatchers/default_dispatch.mjs";
 import LanternTools from "./tools.mjs";
 import URL from "@candlefw/url";
 
@@ -27,16 +26,16 @@ async function respond(d_objs, req, res, url, meta, response_code = 200) {
                 break;
             case 1:
                 res.statusCode = (do_.rcode || 200);
-                res.setHeader('content-type', do_.MIME );
+                res.setHeader('content-type', do_.MIME);
                 res.end(do_.respond, "utf8", (err) => {
                     if (err)
-                        log.error(err)
+                        log.error(err);
                 });
                 return true;
         }
     }
 
-    return false
+    return false;
 }
 
 /** Root dispatch function **/
@@ -67,31 +66,31 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
     let dispatch_object = null;
 
     for (let i = 0; i < keys.length; i++) {
-        let key = `${ext_flag.toString(16)}${keys.slice(0,keys.length-i).join("/")}${i > 0 ? "/*" : "/"}`
+        let key = `${ext_flag.toString(16)}${keys.slice(0, keys.length - i).join("/")}${i > 0 ? "/*" : "/"}`;
         if ((dispatch_object = DispatchMap.get(key)))
-            break
+            break;
     }
 
     dispatch_object = dispatch_object || DispatchMap.get(base_key) || default_dispatch;
 
     for (const dsp of dispatch_object) {
-        if (typeof(dsp.SILENT) == "number") {
+        if (typeof (dsp.SILENT) == "number") {
             dsp.SILENT++;
             if (dsp.SILENT > 100) {
-                log.verbose(`received[${100}] times: Received request for "${req.url}", responding with dispatcher [${dsp.name}]`)
+                log.verbose(`received[${100}] times: Received request for "${req.url}", responding with dispatcher [${dsp.name}]`);
                 dsp.SILENT = 0;
             }
         } else
-             log.verbose(`Received request for "${req.url}", responding with dispatcher [${dsp.name}]`)
+            log.verbose(`Received request for "${req.url}", responding with dispatcher [${dsp.name}]`);
     }
 
-    return await respond(dispatch_object, req, res, url, meta)
+    return await respond(dispatch_object, req, res, url, meta);
 }
 
 
 
 /** Root dispatch function **/
-dispatcher.default = async function(code, req, res, meta, DispatchDefaultMap, ext_map) {
+dispatcher.default = async function (code, req, res, meta, DispatchDefaultMap, ext_map) {
     /** Extra Flags **/
     const url = new URL(req.url);
 
@@ -109,10 +108,10 @@ dispatcher.default = async function(code, req, res, meta, DispatchDefaultMap, ex
 
     let dispatch_object = DispatchDefaultMap.get(extended_key) || DispatchDefaultMap.get(base_key) || default_dispatch;
 
-    log.verbose(`Responding to request for "${req.url}" with code ${code}, using dispatcher [${dispatch_object.name}]`)
+    log.verbose(`Responding to request for "${req.url}" with code ${code}, using dispatcher [${dispatch_object.name}]`);
 
     return await respond([dispatch_object], req, res, url, meta);
-}
+};
 
 export function AddDispatch(DispatchMap, DefaultDispatchMap, ...dispatch_objects) {
 
@@ -130,50 +129,56 @@ function AddCustom(dispatch_object, DispatchMap, DefaultDispatchMap) {
 
     dispatch_object.response_type = 0;
 
-    if (typeof(Respond) !== "function") {
-        if (typeof(Respond) == "string") {
-            if (typeof(dispatch_object.MIME) !== "string") {
-                return log.error("Cannot use String based response type without a mime type definitions")
+    if (typeof (Respond) !== "function") {
+        if (typeof (Respond) == "string") {
+            if (typeof (dispatch_object.MIME) !== "string") {
+                return log.error("Cannot use String based response type without a mime type definitions");
             }
             dispatch_object.response_type = 1;
         } else
-            return log.error(`[${Name}] ${e0x101}`)
+            return log.error(`[${Name}] ${e0x101}`);
     }
 
-    if (typeof(Keys) == "undefined")
-        return log.error(`[${Name}] ${e0x102}`)
+    if (typeof (Keys) == "undefined")
+        return log.error(`[${Name}] ${e0x102}`);
 
-    if (typeof(Name) == "undefined")
-        return log.error(`[${Name}] ${e0x103}`)
+    if (typeof (Name) == "undefined")
+        return log.error(`[${Name}] ${e0x103}`);
 
-    if (typeof(Name) !== "string") {
-        if (typeof(Name) == "number") {
+    if (typeof (Name) !== "string") {
+        if (typeof (Name) == "number") {
             return AddDefaultDispatch(dispatch_object, DefaultDispatchMap);
         }
         return log.error(`[${Name}] ${e0x104}`);
     }
 
-    const ext = Keys.ext;
+    const keys = Array.isArray(Keys) ? Keys : [Keys];
 
-    if (typeof(ext) !== "number")
-        return log.error("dispatch_object.key.ext must be a numerical value")
+    for (const Key of keys) {
 
 
-    const dir_array = Keys.dir.split("/");
+        const ext = Key.ext;
 
-    const dir = (dir_array[dir_array.length - 1] == "*" || dir_array[dir_array.length - 1] == "") ?
-        Keys.dir :
-        dir_array.concat([""]).join("/");
+        if (typeof (ext) !== "number")
+            return log.error("dispatch_object.key.ext must be a numerical value");
 
-    if (dir[dir.length - 1] == "*" && dir.length > 1) {
-        SetDispatchMap(dir.slice(0, -1), dispatch_object, ext, DispatchMap)
+
+        const dir_array = Key.dir.split("/");
+
+        const dir = (dir_array[dir_array.length - 1] == "*" || dir_array[dir_array.length - 1] == "") ?
+            Key.dir :
+            dir_array.concat([""]).join("/");
+
+        if (dir[dir.length - 1] == "*" && dir.length > 1) {
+            SetDispatchMap(dir.slice(0, -1), dispatch_object, ext, DispatchMap);
+        }
+
+        SetDispatchMap(dir, dispatch_object, ext, DispatchMap);
     }
 
-    SetDispatchMap(dir, dispatch_object, ext, DispatchMap);
+    const width = process.stdout.columns - 1;
 
-    const width = process.stdout.columns-1;
-
-    log(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`)
+    log(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
 
     return this;
 }
@@ -206,8 +211,8 @@ function AddDefaultDispatch(dispatch_object, DispatchDefaultMap) {
     const ext = Keys.ext;
     const dir = Keys.dir;
 
-    if (typeof(ext) !== "number")
-        return log.error("dispatch_object.key.ext must be a numerical value")
+    if (typeof (ext) !== "number")
+        return log.error("dispatch_object.key.ext must be a numerical value");
 
     for (let i = 1; i !== 0x10000000; i = (i << 1)) {
 
