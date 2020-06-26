@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 
 const fsp = fs.promises;
-const CFW_NODE_DIR = path.resolve( import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../../node_modules/@candlefw")
+const CFW_NODE_DIR = path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../../node_modules/@candlefw");
 
 export default {
     name: "CFW Builtins DEV",
@@ -11,8 +11,6 @@ export default {
     Available libraries:
         Library :   src name
         ______________________
-        FLAME   :   /cfw/flame
-        RADIATE :   /cfw/radiate
         WICK    :   /cfw/wick
                     /cfw/wicklite
         GLOW    :   /cfw/glow
@@ -23,19 +21,15 @@ export default {
                     /cfw/ecma`,
     respond: async (tools) => {
         switch (tools.filename) {
-            case "flame":
-                tools.setMIMEBasedOnExt("js");
-                return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "flame/build/flame.js"), "utf8"));
-            case "radiate":
-                tools.setMIMEBasedOnExt("js");
-                return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "radiate/build/radiate.js"), "utf8"));
             case "wick":
                 tools.setMIMEBasedOnExt("js");
                 return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.js"), "utf8"));
+            case "wick.rt":
             case "wick.lite":
+            case "wickrt":
             case "wicklite":
                 tools.setMIMEBasedOnExt("js");
-                return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.lite.js"), "utf8"));
+                return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "wick/build/wick.rt.js"), "utf8"));
             case "glow":
                 tools.setMIMEBasedOnExt("js");
                 return tools.sendString(await fsp.readFile(path.resolve(CFW_NODE_DIR, "glow/build/glow.js"), "utf8"));
@@ -57,4 +51,4 @@ export default {
         return false;
     },
     keys: { ext: 0x1, dir: "/cfw" }
-}
+};

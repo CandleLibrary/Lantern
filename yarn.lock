@@ -122,6 +122,22 @@
     env "^0.0.2"
     latest "^0.2.0"
 
+"@candlefw/wick@0.8.13":
+  version "0.8.13"
+  resolved "https://registry.yarnpkg.com/@candlefw/wick/-/wick-0.8.13.tgz#5a2762a991f519382a87358b29cb8f77e875ac75"
+  integrity sha512-hpfHX/X1738h1xyEzmIJjtP18Ku5nZJ0rHvkcp9qAG1uCry5LZtlbfEGreGfqBBNz7Mi3YBiVl+j6Nm7kA1DsQ==
+  dependencies:
+    "@candlefw/css" "^0.1.6"
+    "@candlefw/glow" "0.2.0"
+    "@candlefw/html" "^0.0.14"
+    "@candlefw/math" "^0.0.3"
+    "@candlefw/spark" "^0.0.8"
+    "@candlefw/url" "0.0.13"
+    "@candlefw/whind" "0.3.6"
+    commander "^4.1.0"
+    env "^0.0.2"
+    latest "^0.2.0"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -154,11 +170,6 @@ ansi-colors@3.2.3:
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/ansi-colors/-/ansi-colors-3.2.3.tgz#57d35b8686e851e2cc04c403f1c00203976a1813"
   integrity sha512-LEHHyuhlPY3TmuUYMh2oz89lTShfvgbmzaBcxve9t/9Wuy7Dwf4yoAKcND7KFT1HAQfqZ12qtc+DUrBMeKF9nw==
-
-ansi-regex@*:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-5.0.0.tgz#388539f55179bf39339c81af30a654d69f87cb75"
-  integrity sha512-bY6fj56OUQ0hU1KjFNDQuJFezqKdrAyFdIevADiqrWHwSlbmBNMHp5ak2f40Pm8JTFyM2mqxkG6ngkHO11f/lg==
 
 ansi-regex@^2.0.0:
   version "2.1.1"
@@ -1103,7 +1114,7 @@ iferr@^0.1.5:
   resolved "https://registry.yarnpkg.com/iferr/-/iferr-0.1.5.tgz#c60eed69e6d8fdb6b3104a1fcbca1c192dc5b501"
   integrity sha1-xg7taebY/bazEEofy8ocGS3FtQE=
 
-imurmurhash@*, imurmurhash@^0.1.4:
+imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
   integrity sha1-khi5srkoojixPcT7a21XbyMUU+o=
