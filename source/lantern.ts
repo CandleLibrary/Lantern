@@ -1,15 +1,16 @@
 import http from "http";
-import path from "path";
+import https from "https";
 import dispatcher from "./dispatcher.js";
 import { AddDispatch } from "./dispatcher.js";
 import ext_map from "./extension_map.js";
 import { addKey } from "./extension_map.js";
 import log from "./log.js";
-import resolve from "resolve";
 
 import poller_dispatch from "./dispatchers/poller_dispatch.js";
 import candlefw_dispatch from "./dispatchers/candlefw_dispatch.js";
 import $404_dispatch from "./dispatchers/404_dispatch.js";
+import { LanternServer, Dispatcher, DispatchKey } from "./types.js";
+import URL from "@candlefw/url";
 
 export {
     poller_dispatch,
@@ -17,7 +18,20 @@ export {
     $404_dispatch
 };
 
-export default function lantern(config = {}, CLI_RUN = false) {
+export default async function lantern(
+    config: {
+        port?: number;
+        server_name?: string,
+        secure?: {
+            key: string | URL,
+            cert: string | URL;
+        };
+    } = {},
+    CLI_RUN = false,
+
+): Promise<LanternServer<http.Server> | LanternServer<http.Server>> {
+
+    await URL.polyfill();
 
     /* Routes HTTP request depending on active dispatch modules. */
     const
@@ -29,7 +43,9 @@ export default function lantern(config = {}, CLI_RUN = false) {
 
     log.verbose(`${config.server_name || "Lantern"} set to listen on port ${config.port}`);
 
-    const server = http.createServer(async (request, response) => {
+    let lantern: LanternServer<http.Server> | LanternServer<http.Server>;
+
+    const responseFunction = async (request, response) => {
 
         const meta = { authorized: false };
 
@@ -41,23 +57,47 @@ export default function lantern(config = {}, CLI_RUN = false) {
             log.error(e);
             dispatcher.default(404, request, response, meta, DispatchDefaultMap, ext_map);
         }
-    });
+    };
 
-    server.listen(config.port, err => {
-        if (err) log.error(err);
-    });
+    if (config.secure) {
 
-    const lantern = {};
+        const { key, cert } = config.secure,
 
-    lantern.server = server;
+            options = {
+                key: key instanceof URL ? await key.fetchText() : key,
+                cert: cert instanceof URL ? await cert.fetchText() : cert,
+            };
 
-    const ad = AddDispatch.bind(lantern);
+        const server = https.createServer(options, responseFunction);
 
-    lantern.addExtension = (key_name, mime_type) => addKey(key_name, ext_map, mime_type);
-    lantern.addDispatch = (...v) => ad(DispatchMap, DispatchDefaultMap, ...v);
+        server.listen(config.port, () => { });
 
-    lantern.ext = ext_map;
-    lantern.close = server.close.bind(server);
+        lantern = <LanternServer<https.Server>>{
+            ext: ext_map,
+            server,
+            addExtension: (key_name, mime_type) => addKey(key_name, ext_map),
+            addDispatch: (...v) => AddDispatch(DispatchMap, DispatchDefaultMap, ...v),
+            close: server.close.bind(server)
+        };
+
+    } else {
+
+        const server = http.createServer(responseFunction);
+
+        server.listen(config.port, () => { });
+
+        lantern = <LanternServer<http.Server>>{
+            ext: ext_map,
+            server,
+            addExtension: (key_name, mime_type) => addKey(key_name, ext_map),
+            addDispatch: (...v) => AddDispatch(DispatchMap, DispatchDefaultMap, ...v),
+            close: server.close.bind(server)
+        };
+    }
+
+    lantern.addDispatch.bind(lantern);
 
     return lantern;
-}
+};
+
+export { Dispatcher, DispatchKey };

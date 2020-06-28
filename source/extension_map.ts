@@ -19,7 +19,11 @@ const common_extension =
 	];
 
 const ext_map = common_extension.reduce((a, e, i) => (a[e] = 1 << (i), a), {});
+
+//@ts-ignore
 ext_map.any = 0x80000000;
+
+//@ts-ignore
 ext_map.all = 0xFFFFFFFF;
 
 let key_offset = common_extension.length;

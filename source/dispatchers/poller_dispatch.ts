@@ -1,9 +1,9 @@
 const pollerCache = new Map();
-
-import fs from "fs";
 import log from "../log.js";
 import path from "path";
 import watch from "node-watch";
+import { Dispatcher } from "../types";
+
 
 function watchPath(ID) {
     if (ID && !pollerCache.has(ID)) {
@@ -32,7 +32,7 @@ function watchPath(ID) {
     return true;
 }
 
-export default {
+export default <Dispatcher>{
     name: "Auto-Load-Poller Loader",
     description:
         `Sends a poller js file that automatically polls the server to see 
@@ -55,7 +55,7 @@ where {dirs} is a list of domain directories separated by semicolon
         if (ID) {
             if (!watchPath(ID)) {
                 tools.setMIME();
-                return tools.sendString(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`);
+                return tools.sendUTF8(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`);
             }
         }
 
@@ -71,14 +71,14 @@ where {dirs} is a list of domain directories separated by semicolon
 
             tools.setMIMEBasedOnExt("json");
 
-            return tools.sendString(`{"UPDATED":${result}}`);
+            return tools.sendUTF8(`{"UPDATED":${result}}`);
         } else {
 
             const rate = 100;
 
             tools.setMIME();
 
-            return tools.sendString(`
+            return tools.sendUTF8(`
                 import URL from "/cfw/url";
                     const url = new URL("/lantern-poll/poll");
                     const base_url = new URL();

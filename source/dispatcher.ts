@@ -1,8 +1,10 @@
+import URL from "@candlefw/url";
+
 import path from "path";
 import log from "./log.js";
 import default_dispatch from "./dispatchers/default_dispatch.js";
 import LanternTools from "./tools.js";
-import URL from "@candlefw/url";
+import { Dispatcher } from "./types.js";
 
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
@@ -10,27 +12,25 @@ const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missi
 const e0x103 = "Dispatch object must have name. Error missing dispatch_object.name.";
 const e0x104 = "Dispatch object name must be a string. Error dispatch_object.name is not a string value.";
 
-async function respond(d_objs, req, res, url, meta, response_code = 200) {
+async function respond(d_objs: Array<Dispatcher>, req, res, url, meta, response_code = 200) {
 
     for (let i = 0; i < d_objs.length; i++) {
         let do_ = d_objs[i];
 
+        const tools = new LanternTools(do_, req, res, meta, url);
+
         switch (do_.response_type) {
 
             case 0:
-                const tools = new LanternTools(do_, req, res, meta, url);
-                const result = await tools.respond();
+                const SUCCESS = await tools.respond();
                 tools.destroy();
-                if (result)
-                    return result;
+                if (SUCCESS) return SUCCESS;
                 break;
+
             case 1:
-                res.statusCode = (do_.rcode || 200);
-                res.setHeader('content-type', do_.MIME);
-                res.end(do_.respond, "utf8", (err) => {
-                    if (err)
-                        log.error(err);
-                });
+                tools.setStatusCode(do_.response_code || 200);
+                tools.setMIME(do_.MIME);
+                tools.sendUTF8String();
                 return true;
         }
     }

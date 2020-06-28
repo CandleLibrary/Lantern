@@ -1,8 +1,8 @@
 import data from "../data/404.data.js";
-
-export default {
+import { Dispatcher } from "../types";
+export default <Dispatcher>{
     name: "404",
-    rcode: 404,
+    response_code: 404,
     MIME: "text/html",
     respond: data,
     keys:

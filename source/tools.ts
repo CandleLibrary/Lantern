@@ -2,14 +2,41 @@ import path from "path";
 import fs from "fs";
 import log from "./log.js";
 import ExtToMIME from "./ext_to_mime.js";
+import URL from "@candlefw/url";
+import { Tools, Dispatcher } from "./types";
+import http from "http";
 
 const fsp = fs.promises;
 
 const PWD = process.cwd();
 
-export default class LanternTools {
-    constructor(distribution_object, req, res, meta, url) {
-        let tool;
+/**
+ * Contains helper functions and data pertaining
+ * to a single request/response sequence. 
+ */
+export default class LanternTools implements Tools {
+
+    private res: http.ServerResponse;
+    private req: http.ClientRequest;
+    private next: LanternTools;
+    private do: any;
+
+    private _url: URL;
+    private _ext: string;
+    private data: any;
+    private meta: any;
+
+    private static cache: LanternTools;
+
+
+    constructor(
+        distribution_object: Dispatcher,
+        req: http.ClientRequest,
+        res: http.ServerResponse,
+        meta: any,
+        url: URL
+    ) {
+        let tool: LanternTools;
 
         if (LanternTools.cache) {
             tool = LanternTools.cache;
@@ -23,8 +50,8 @@ export default class LanternTools {
         tool.res = res;
         tool.meta = meta;
         tool.next = null;
-        tool.url = url;
-        tool.ext = (url) ? url.ext : "";
+        tool._url = url;
+        tool._ext = (url) ? url.ext : "";
         tool.data = null;
 
         return tool;
@@ -37,7 +64,7 @@ export default class LanternTools {
         this.res = null;
         this.req = null;
         this.meta = null;
-        this.url = null;
+        this._url = null;
     }
 
     async readData() {
@@ -64,135 +91,7 @@ export default class LanternTools {
         });
     }
 
-    async getJSONasObject() {
-        const data = await this.readData();
 
-        try {
-            if (this.data)
-                return JSON.parse(this.data);
-        } catch (e) {
-            log.error(e);
-            return {};
-        }
-    }
-
-    getCookie() {
-
-    }
-
-    setMIME(MIME) {
-        if (MIME === undefined)
-            MIME = this.do.MIME ? this.do.MIME : "text/plain";
-        this.res.setHeader("content-type", MIME.toString());
-    }
-
-    setMIMEBasedOnExt(ext = "") {
-        let MIME = "text/plain";
-
-        if (!this.ext)
-            this.ext = ext;
-
-        if (this.ext) {
-            let mime = ExtToMIME[this.ext];
-            if (mime) MIME = mime;
-        }
-
-        this.res.setHeader("content-type", MIME);
-    }
-
-    setStatusCode(code = 200) {
-        this.res.statusCode = (code);
-    }
-
-    setCookie(cookie_name, cookie_value) {
-        this.res.setHeader("set-cookie", `${cookie_name}=${cookie_value}`);
-    }
-
-    getHeader(header_name) {
-        return this.req.headers[header_name];
-    }
-
-    async redirect(url) {
-        this.res.statusCode = 301;
-        this.res.setHeader("location", url);
-        this.res.end();
-        return true;
-    }
-
-    async getUTF8(file_path) {
-        try {
-            return await fsp.readFile(path.join(PWD, file_path), "utf8");
-        } catch (e) {
-            log.error(e);
-            return "";
-        }
-    }
-
-    async sendRaw(file_path) {
-        const loc = path.join(PWD, file_path);
-
-        log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher [${this.do.name}]`);
-
-        //open file stream
-
-
-        const stream = fs.createReadStream(loc);
-
-
-        stream.on("data", buffer => {
-            this.res.write(buffer);
-        });
-
-        return await (new Promise(resolve => {
-            stream.on("end", () => {
-                this.res.end();
-                resolve(true);
-            });
-            stream.on("error", e => {
-                resolve(false);
-            });
-        })).catch(e => {
-            console.log("thrown:1", e);
-        });
-    }
-
-    async sendUTF8(file_path) {
-        try {
-            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher [${this.do.name}]`);
-            this.res.end(await fsp.readFile(path.join(PWD, file_path), "utf8"), "utf8");
-        } catch (e) {
-            return false;
-        }
-
-        return true;
-    }
-
-    async sendString(string) {
-        this.res.end(string, "utf8");
-        return true;
-    }
-
-    get filename() {
-        return this.url.filename;
-    }
-
-    get file() {
-        return this.url.file;
-    }
-
-    get pathname() {
-        return this.url.pathname;
-    }
-
-    get dir() {
-        return this.url.dir;
-    }
-
-    redirect(new_url) {
-        this.res.writeHead(301, { Location: new_url + "" });
-        this.res.end();
-        return true;
-    }
 
     async respond() {
 
@@ -207,10 +106,159 @@ export default class LanternTools {
         return DISPATCH_SUCCESSFUL;
     }
 
-    error(error) {
+    /**
+     * Returns and object of the request data parsed as 
+     * a JSON object.
+     */
+    async getJSONasObject() {
+
+        try {
+            if (this.data)
+                return JSON.parse(await this.readData());
+        } catch (e) {
+            log.error(e);
+            return {};
+        }
+    }
+
+    getCookie() {
+
+    }
+
+    setMIME(MIME?: string) {
+        if (MIME === undefined)
+            MIME = this.do.MIME ? this.do.MIME : "text/plain";
+        this.res.setHeader("content-type", MIME.toString());
+    }
+
+    setMIMEBasedOnExt(ext = "") {
+        let MIME = "text/plain";
+
+        if (!this._ext)
+            this._ext = ext;
+
+        if (this._ext) {
+            let mime = ExtToMIME[this._ext];
+            if (mime) MIME = mime;
+        }
+
+        this.res.setHeader("content-type", MIME);
+    }
+
+    /**
+     * Set the status code of the response
+     * @param code 
+     */
+    setStatusCode(code = 200) {
+        this.res.statusCode = (code);
+    }
+
+    setCookie(cookie_name: any, cookie_value: any) {
+        this.res.setHeader("set-cookie", `${cookie_name}=${cookie_value}`);
+    }
+
+    getHeader(header_name: string) {
+        return <string>this.req.getHeader(header_name);
+    }
+
+    async getUTF8(file_path: string): Promise<string> {
+        try {
+            return await fsp.readFile(path.join(PWD, file_path), "utf8");
+        } catch (e) {
+            log.error(e);
+            return "";
+        }
+    };
+
+    async sendUTF8(file_path: string): Promise<boolean> {
+        try {
+            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher [${this.do.name}]`);
+            this.res.write(await fsp.readFile(path.join(PWD, file_path), "utf8"), "utf8");
+            this.res.end();
+        } catch (e) {
+            return false;
+        }
+
+        return true;
+    };
+
+    async sendUTF8String(str: string = <string>this.do.respond): Promise<boolean> {
+        try {
+            log.verbose(`Responding with utf8 by dispatcher [${this.do.name}]`);
+            this.res.write(str, "utf8");
+            this.res.end;
+        } catch (e) {
+            log.error(e);
+            return false;
+        }
+
+        return true;
+    };
+
+    async sendRaw(file_path: string): Promise<boolean> {
+        const loc = path.join(PWD, file_path);
+
+        log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher [${this.do.name}]`);
+
+        //open file stream
+
+        const stream = fs.createReadStream(loc);
+
+        stream.on("data", buffer => {
+            this.res.write(buffer);
+        });
+
+        return await <Promise<boolean>>(new Promise(resolve => {
+            stream.on("end", () => {
+                this.res.end();
+                stream.close();
+                resolve(true);
+            });
+            stream.on("error", e => {
+                stream.close();
+                resolve(false);
+            });
+        })).catch(e => {
+            stream.close();
+            console.log("thrown:1", e);
+            return false;
+        });
+    };
+    get filename(): string {
+        return this._url.filename;
+    }
+
+    get file(): string {
+        return this._url.file;
+    }
+
+    get pathname(): string {
+        return this._url.pathname;
+    }
+
+    get dir(): string {
+        return this._url.dir;
+    }
+
+    get url(): URL {
+        return new URL(this._url);
+    }
+
+    get ext(): string {
+        return this._ext;
+    }
+
+    redirect(new_url: string) {
+        this.res.writeHead(301, { Location: new_url + "" });
+        this.res.end();
+        return true;
+    }
+
+    error(error: any) {
         console.log(error);
         return false;
     }
 }
 
+//@ts-ignore
 LanternTools.cache = new LanternTools();

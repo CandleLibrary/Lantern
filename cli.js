@@ -7,36 +7,38 @@ import $404_dispatch from "./build/library/dispatchers/404_dispatch.js";
 import path from 'path';
 
 
-const server = lantern({ port: process.env.PORT }, true);
+lantern({ port: process.env.PORT }, true).then(server => {
 
-server.addDispatch(
-    {
-        name: "General",
-        MIME: "text/html",
-        respond: async function (tools) {
+    server.addDispatch(
+        {
+            name: "General",
+            MIME: "text/html",
+            respond: async function (tools) {
 
-            if (!tools.ext) {
+                if (!tools.ext) {
 
-                if (tools.url.path.slice(-1) !== "/") {
-                    //redirect to path with end delimiter added. Prevents errors with relative links.
-                    tools.url.path += "/";
-                    return tools.redirect(tools.url);
+                    if (tools.url.path.slice(-1) !== "/") {
+                        //redirect to path with end delimiter added. Prevents errors with relative links.
+                        tools.url.path += "/";
+                        return tools.redirect(tools.url);
+                    }
+
+                    //look for index html;
+                    tools.setMIME();
+
+                    return tools.sendUTF8(path.join(tools.dir, tools.file || "", "index.html"));
                 }
 
-                //look for index html;
-                tools.setMIME();
+                tools.setMIMEBasedOnExt();
 
-                return tools.sendUTF8(path.join(tools.dir, tools.file || "", "index.html"));
-            }
-
-            tools.setMIMEBasedOnExt();
-
-            return tools.sendRaw(path.join(tools.dir, tools.file));
+                return tools.sendRaw(path.join(tools.dir, tools.file));
+            },
+            keys: { ext: server.ext.all, dir: "*" }
         },
-        keys: { ext: server.ext.all, dir: "*" }
-    },
-    poller_dispatch,
-    candlefw_dispatch,
-    $404_dispatch
-);
+        poller_dispatch,
+        candlefw_dispatch,
+        $404_dispatch
+    );
 
+
+});

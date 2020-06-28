@@ -2,7 +2,7 @@
   "name": "@candlefw/lantern",
   "version": "0.0.15-ts",
   "description": "CFW Web Server",
-  "main": "./build/library/main.js",
+  "main": "./build/library/lantern.js",
   "types": "./build/types/lantern.d.ts",
   "type": "module",
   "bin": {
