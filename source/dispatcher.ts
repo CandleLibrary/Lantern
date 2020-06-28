@@ -1,6 +1,6 @@
 import URL from "@candlefw/url";
 
-import path from "path";
+
 import log from "./log.js";
 import default_dispatch from "./dispatchers/default_dispatch.js";
 import LanternTools from "./tools.js";
@@ -12,23 +12,28 @@ const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missi
 const e0x103 = "Dispatch object must have name. Error missing dispatch_object.name.";
 const e0x104 = "Dispatch object name must be a string. Error dispatch_object.name is not a string value.";
 
-async function respond(d_objs: Array<Dispatcher>, req, res, url, meta, response_code = 200) {
+async function respond(d_objs: Array<Dispatcher>, req, res, url, meta) {
 
     for (let i = 0; i < d_objs.length; i++) {
         let do_ = d_objs[i];
 
         const tools = new LanternTools(do_, req, res, meta, url);
 
+
+        console.log(do_.response_type, do_.name);
+
         switch (do_.response_type) {
 
             case 0:
+                console.log(do_.name, ":function respond");
                 const SUCCESS = await tools.respond();
                 tools.destroy();
                 if (SUCCESS) return SUCCESS;
                 break;
 
             case 1:
-                tools.setStatusCode(do_.response_code || 200);
+                console.log(do_.name, ":string respond");
+                tools.setStatusCode();
                 tools.setMIME(do_.MIME);
                 tools.sendUTF8String();
                 return true;
@@ -44,11 +49,7 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
     // Authenticated
     const url = new URL(req.url);
 
-    const _path = path.parse(url.pathname);
-
     const dir = (url.dir == "/") ? "/" : url.dir;
-
-    const name = url.filename;
 
     const ext = url.ext;
 
@@ -56,8 +57,6 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;
-
-    let extended_key = `${ext_flag.toString(16)}${dir}`;
 
     let base_key = `${ext_flag.toString(16)}`;
 
@@ -92,14 +91,13 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 /** Root dispatch function **/
 dispatcher.default = async function (code, req, res, meta, DispatchDefaultMap, ext_map) {
     /** Extra Flags **/
-    const url = new URL(req.url);
-
-    const _path = path.parse(url.pathname);
-    const dir = (url.dir == "/") ? "/" : url.dir;
-    const name = url.filename;
-    const ext = url.ext;
+    const
+        url = new URL(req.url),
+        dir = (url.dir == "/") ? "/" : url.dir,
+        ext = url.ext;
 
     let ext_flag = 1; // The "No Extension" value
+
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value; 
 
@@ -113,27 +111,56 @@ dispatcher.default = async function (code, req, res, meta, DispatchDefaultMap, e
     return await respond([dispatch_object], req, res, url, meta);
 };
 
+function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
+
+    for (let i = 1; i !== 0x10000000; i = (i << 1)) {
+        if ((ext & i)) {
+            let dispatch_key;
+            if (dir == "*") {
+                dispatch_key = `${i.toString(16)}`;
+            } else {
+                dispatch_key = `${i.toString(16)}${dir}`;
+            }
+
+            let d = DispatchMap.get(dispatch_key);
+
+            if (d) {
+                d.push(dispatch_object);
+            } else
+                DispatchMap.set(dispatch_key, [dispatch_object]);
+        }
+    }
+}
+
 export function AddDispatch(DispatchMap, DefaultDispatchMap, ...dispatch_objects) {
 
     for (let i = 0, l = dispatch_objects.length; i < l; i++) {
-        AddCustom(dispatch_objects[i], DispatchMap, DefaultDispatchMap);
+        AddCustomDispatch(dispatch_objects[i], DispatchMap, DefaultDispatchMap);
     }
 
     return this;
 }
 
-function AddCustom(dispatch_object, DispatchMap, DefaultDispatchMap) {
-    let Keys = dispatch_object.keys;
-    let Name = dispatch_object.name;
-    let Respond = dispatch_object.respond;
+function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
+
+    let
+        Keys = dispatch_object.keys,
+        Name = dispatch_object.name,
+        Respond = dispatch_object.respond;
 
     dispatch_object.response_type = 0;
 
-    if (typeof (Respond) !== "function") {
-        if (typeof (Respond) == "string") {
+    const t_o_r = typeof (Respond);
+
+    if (t_o_r !== "function") {
+
+        if (t_o_r == "string") {
+
             if (typeof (dispatch_object.MIME) !== "string") {
-                return log.error("Cannot use String based response type without a mime type definitions");
+                log.message(`Using text/plain MIME type for Dispatcher ${Name}`);
+                dispatch_object.MIME = "text/plain";
             }
+
             dispatch_object.response_type = 1;
         } else
             return log.error(`[${Name}] ${e0x101}`);
@@ -183,28 +210,8 @@ function AddCustom(dispatch_object, DispatchMap, DefaultDispatchMap) {
     return this;
 }
 
-function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
-
-    for (let i = 1; i !== 0x10000000; i = (i << 1)) {
-        if ((ext & i)) {
-            let dispatch_key;
-            if (dir == "*") {
-                dispatch_key = `${i.toString(16)}`;
-            } else {
-                dispatch_key = `${i.toString(16)}${dir}`;
-            }
-
-            let d = DispatchMap.get(dispatch_key);
-
-            if (d) {
-                d.push(dispatch_object);
-            } else
-                DispatchMap.set(dispatch_key, [dispatch_object]);
-        }
-    }
-}
-
 function AddDefaultDispatch(dispatch_object, DispatchDefaultMap) {
+
     let Keys = dispatch_object.keys;
     let Name = dispatch_object.name;
 

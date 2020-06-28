@@ -149,7 +149,7 @@ export default class LanternTools implements Tools {
      * Set the status code of the response
      * @param code 
      */
-    setStatusCode(code = 200) {
+    setStatusCode(code = this.do.response_code || 200) {
         this.res.statusCode = (code);
     }
 

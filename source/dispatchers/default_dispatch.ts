@@ -1,9 +1,2 @@
-import { Dispatcher } from "../types";
-
-const default_dispatch = <Dispatcher>{
-    response_type: 0,
-    name: "Default",
-    respond: async (tools) => { return false; }
-};
-
-export default default_dispatch;
+import $404_dispatch from "./404_dispatch.js";
+export default $404_dispatch;
