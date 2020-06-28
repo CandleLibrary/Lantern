@@ -55,7 +55,7 @@ where {dirs} is a list of domain directories separated by semicolon
         if (ID) {
             if (!watchPath(ID)) {
                 tools.setMIME();
-                return tools.sendUTF8(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`);
+                return tools.sendUTF8FromFile(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`);
             }
         }
 
@@ -71,14 +71,14 @@ where {dirs} is a list of domain directories separated by semicolon
 
             tools.setMIMEBasedOnExt("json");
 
-            return tools.sendUTF8(`{"UPDATED":${result}}`);
+            return tools.sendUTF8FromFile(`{"UPDATED":${result}}`);
         } else {
 
             const rate = 100;
 
             tools.setMIME();
 
-            return tools.sendUTF8(`
+            return tools.sendUTF8FromFile(`
                 import URL from "/cfw/url";
                     const url = new URL("/lantern-poll/poll");
                     const base_url = new URL();

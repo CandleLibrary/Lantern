@@ -50,9 +50,8 @@ export default async function lantern(
         const meta = { authorized: false };
 
         try {
-            if (!(await dispatcher(request, response, meta, DispatchMap, ext_map))) {
+            if (!(await dispatcher(request, response, meta, DispatchMap, ext_map)))
                 dispatcher.default(404, request, response, meta, DispatchDefaultMap, ext_map);
-            }
         } catch (e) {
             log.error(e);
             dispatcher.default(404, request, response, meta, DispatchDefaultMap, ext_map);

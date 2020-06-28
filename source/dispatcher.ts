@@ -19,20 +19,15 @@ async function respond(d_objs: Array<Dispatcher>, req, res, url, meta) {
 
         const tools = new LanternTools(do_, req, res, meta, url);
 
-
-        console.log(do_.response_type, do_.name);
-
         switch (do_.response_type) {
 
             case 0:
-                console.log(do_.name, ":function respond");
                 const SUCCESS = await tools.respond();
                 tools.destroy();
                 if (SUCCESS) return SUCCESS;
                 break;
 
             case 1:
-                console.log(do_.name, ":string respond");
                 tools.setStatusCode();
                 tools.setMIME(do_.MIME);
                 tools.sendUTF8String();
@@ -47,11 +42,9 @@ async function respond(d_objs: Array<Dispatcher>, req, res, url, meta) {
 export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     // Authenticated
-    const url = new URL(req.url);
-
-    const dir = (url.dir == "/") ? "/" : url.dir;
-
-    const ext = url.ext;
+    const url = new URL(req.url),
+        dir = (url.dir == "/") ? "/" : url.dir,
+        ext = url.ext;
 
     let ext_flag = 1; // The "No Extension" value
 
@@ -72,16 +65,12 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     dispatch_object = dispatch_object || DispatchMap.get(base_key) || default_dispatch;
 
-    for (const dsp of dispatch_object) {
-        if (typeof (dsp.SILENT) == "number") {
-            dsp.SILENT++;
-            if (dsp.SILENT > 100) {
-                log.verbose(`received[${100}] times: Received request for "${req.url}", responding with dispatcher [${dsp.name}]`);
-                dsp.SILENT = 0;
-            }
-        } else
-            log.verbose(`Received request for "${req.url}", responding with dispatcher [${dsp.name}]`);
-    }
+    log.message(`Received request for "${req.url}", responding with dispatchers [${
+        dispatch_object
+            .filter(dsp => typeof (dsp.SILENT) == "number" ? dsp.SILENT++ > 100 ? (dsp.SILENT = 0, true) : false : true)
+            .map((dsp, i) => `${i + 1}: ${dsp.name}`)
+            .join(", ")
+        }]`);
 
     return await respond(dispatch_object, req, res, url, meta);
 }
@@ -106,7 +95,7 @@ dispatcher.default = async function (code, req, res, meta, DispatchDefaultMap, e
 
     let dispatch_object = DispatchDefaultMap.get(extended_key) || DispatchDefaultMap.get(base_key) || default_dispatch;
 
-    log.verbose(`Responding to request for "${req.url}" with code ${code}, using dispatcher [${dispatch_object.name}]`);
+    log.message(`Responding to request for "${req.url}" with code ${code}, using default dispatcher [${dispatch_object.name}]`);
 
     return await respond([dispatch_object], req, res, url, meta);
 };
@@ -155,12 +144,6 @@ function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
     if (t_o_r !== "function") {
 
         if (t_o_r == "string") {
-
-            if (typeof (dispatch_object.MIME) !== "string") {
-                log.message(`Using text/plain MIME type for Dispatcher ${Name}`);
-                dispatch_object.MIME = "text/plain";
-            }
-
             dispatch_object.response_type = 1;
         } else
             return log.error(`[${Name}] ${e0x101}`);
@@ -205,7 +188,12 @@ function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
 
     const width = process.stdout.columns - 1;
 
-    log(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
+    log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
+
+    if (typeof (dispatch_object.MIME) !== "string") {
+        log.sub_message(`Using text/plain MIME type.`);
+        dispatch_object.MIME = "text/plain";
+    }
 
     return this;
 }

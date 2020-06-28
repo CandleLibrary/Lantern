@@ -55,14 +55,14 @@ export interface Tools {
      *
      * @param file_path
      */
-    getUTF8(file_path: string): Promise<string>;
+    getUTF8FromFile(file_path: string): Promise<string>;
 
     /**
      * Respond to the request with a UTF-8 encoded string of the contents of the
      * file at file_path and resolve `true`, or resolve `false` 
      * if there was an error reading the file.
      */
-    sendUTF8(file_path: string): Promise<boolean>;
+    sendUTF8FromFile(file_path: string): Promise<boolean>;
 
     /**
      * Respond to the request with a UTF-8 encoded string and resolve `true`.
@@ -76,7 +76,7 @@ export interface Tools {
      * file_path and resolve `true`, or resolve `false` if there was 
      * an error reading the file.
      */
-    sendRaw(file_path: string): Promise<boolean>;
+    sendRawStreamFromFile(file_path: string): Promise<boolean>;
 
     readonly filename: string;
     readonly file: string;
@@ -85,7 +85,7 @@ export interface Tools {
     readonly dir: string;
     readonly url: URL;
 
-    redirect(new_url: string | URL): true;
+    redirect(new_url: string | URL): boolean;
     error(error): void;
 }
 

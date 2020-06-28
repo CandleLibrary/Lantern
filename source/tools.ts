@@ -8,7 +8,7 @@ import http from "http";
 
 const fsp = fs.promises;
 
-const PWD = process.cwd();
+const CWD = process.cwd();
 
 /**
  * Contains helper functions and data pertaining
@@ -100,7 +100,7 @@ export default class LanternTools implements Tools {
         try {
             DISPATCH_SUCCESSFUL = await this.do.respond(this);
         } catch (e) {
-            log.error(`Response with dispatcher [${this.do.name}] failed: \n${e.stack}`);
+            log.sub_error(`Response with dispatcher [${this.do.name}] failed: \n${e.stack}`);
         }
 
         return DISPATCH_SUCCESSFUL;
@@ -161,44 +161,48 @@ export default class LanternTools implements Tools {
         return <string>this.req.getHeader(header_name);
     }
 
-    async getUTF8(file_path: string): Promise<string> {
+    async getUTF8FromFile(file_path: string): Promise<string> {
         try {
-            return await fsp.readFile(path.join(PWD, file_path), "utf8");
+            return await fsp.readFile(path.join(CWD, file_path), "utf8");
         } catch (e) {
             log.error(e);
             return "";
         }
     };
 
-    async sendUTF8(file_path: string): Promise<boolean> {
+    async sendUTF8FromFile(file_path: string): Promise<boolean> {
+
+        const loc = path.isAbsolute(file_path) ? file_path : path.join(CWD, file_path);
+
         try {
-            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher [${this.do.name}]`);
-            this.res.write(await fsp.readFile(path.join(PWD, file_path), "utf8"), "utf8");
+            const str = await fsp.readFile(loc, "utf8");
+            this.res.write(str, "utf8");
             this.res.end();
+            log.sub_message(`Responding with utf8 encoded data from file ${loc}`);
+            return true;
         } catch (e) {
+            log.sub_error(e.stack);
             return false;
         }
-
-        return true;
     };
 
     async sendUTF8String(str: string = <string>this.do.respond): Promise<boolean> {
         try {
-            log.verbose(`Responding with utf8 by dispatcher [${this.do.name}]`);
             this.res.write(str, "utf8");
-            this.res.end;
+            this.res.end();
+            log.sub_message(`Responding with utf8 string`);
         } catch (e) {
-            log.error(e);
+            log.sub_error(e);
             return false;
         }
 
         return true;
     };
 
-    async sendRaw(file_path: string): Promise<boolean> {
-        const loc = path.join(PWD, file_path);
+    async sendRawStreamFromFile(file_path: string): Promise<boolean> {
+        const loc = path.isAbsolute(file_path) ? file_path : path.join(CWD, file_path);
 
-        log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher [${this.do.name}]`);
+        log.sub_message(`Responding with raw data stream from file ${loc} by dispatcher [${this.do.name}]`);
 
         //open file stream
 
@@ -215,12 +219,13 @@ export default class LanternTools implements Tools {
                 resolve(true);
             });
             stream.on("error", e => {
+                log.error((e));
                 stream.close();
                 resolve(false);
             });
         })).catch(e => {
+            log.sub_error(e);
             stream.close();
-            console.log("thrown:1", e);
             return false;
         });
     };
@@ -249,13 +254,21 @@ export default class LanternTools implements Tools {
     }
 
     redirect(new_url: string) {
+
+        if (new_url + "" == this._url + "") {
+            log.sub_error(`No difference between redirected URL ${new_url} and original request URL.`);
+            return false;
+        }
+
         this.res.writeHead(301, { Location: new_url + "" });
+
         this.res.end();
+
         return true;
     }
 
     error(error: any) {
-        console.log(error);
+        log.sub_error(error);
         return false;
     }
 }
