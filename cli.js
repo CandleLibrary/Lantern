@@ -1,44 +1,42 @@
 #!/usr/bin/env node
 
-import runner from "./source/main.mjs"
-import poller_dispatch from "./source/dispatchers/poller_dispatch.mjs";
-import candlefw_dispatch from "./source/dispatchers/candlefw_dispatch.js";
-import $404_dispatch from "./source/dispatchers/404_dispatch.js";
-import wick_template_dispatch from "./source/dispatchers/wick_template_dispatch.js";
+import lantern from "./build/library/main.js";
+import poller_dispatch from "./build/library/dispatchers/poller_dispatch.js";
+import candlefw_dispatch from "./build/library/dispatchers/candlefw_dispatch.js";
+import $404_dispatch from "./build/library/dispatchers/404_dispatch.js";
 import path from 'path';
 
 
-const lantern = runner({ port: process.env.PORT }, true);
+const server = lantern({ port: process.env.PORT }, true);
 
-lantern.addDispatch(
-    wick_template_dispatch,
-{
-    name: "General",
-    MIME: "text/html",
-    respond: async function(tools) {
+server.addDispatch(
+    {
+        name: "General",
+        MIME: "text/html",
+        respond: async function (tools) {
 
-        if (!tools.ext) {
+            if (!tools.ext) {
 
-            if(tools.url.path.slice(-1) !== "/"){
-                //redirect to path with end delemiter added. Prevents errors with relative links.
-                tools.url.path += "/"
-                return tools.redirect(tools.url);
+                if (tools.url.path.slice(-1) !== "/") {
+                    //redirect to path with end delimiter added. Prevents errors with relative links.
+                    tools.url.path += "/";
+                    return tools.redirect(tools.url);
+                }
+
+                //look for index html;
+                tools.setMIME();
+
+                return tools.sendUTF8(path.join(tools.dir, tools.file || "", "index.html"));
             }
 
-            //look for index html;
-            tools.setMIME();
-            
-            return tools.sendUTF8(path.join(tools.dir, tools.file || "", "index.html"))
-        }
+            tools.setMIMEBasedOnExt();
 
-        tools.setMIMEBasedOnExt();
-
-        return tools.sendRaw(path.join(tools.dir, tools.file));
+            return tools.sendRaw(path.join(tools.dir, tools.file));
+        },
+        keys: { ext: server.ext.all, dir: "*" }
     },
-    keys: { ext: lantern.ext.all, dir: "*" }
-}, 
-poller_dispatch,
-candlefw_dispatch,
-$404_dispatch
-)
+    poller_dispatch,
+    candlefw_dispatch,
+    $404_dispatch
+);
 

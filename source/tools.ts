@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
-import log from "./log.mjs";
-import ExtToMIME from "./ext_to_mime.mjs"
+import log from "./log.js";
+import ExtToMIME from "./ext_to_mime.js";
 
 const fsp = fs.promises;
 
@@ -42,7 +42,7 @@ export default class LanternTools {
 
     async readData() {
 
-        if(this.data)
+        if (this.data)
             return this.data;
 
         return new Promise(res => {
@@ -55,13 +55,13 @@ export default class LanternTools {
 
             req.on("data", d => {
                 body += d;
-            })
-
-            req.on("end",()=>{
-                this.data = body;
-                res();   
             });
-        })
+
+            req.on("end", () => {
+                this.data = body;
+                res();
+            });
+        });
     }
 
     async getJSONasObject() {
@@ -69,7 +69,7 @@ export default class LanternTools {
 
         try {
             if (this.data)
-                return JSON.parse(this.data)
+                return JSON.parse(this.data);
         } catch (e) {
             log.error(e);
             return {};
@@ -131,7 +131,7 @@ export default class LanternTools {
     async sendRaw(file_path) {
         const loc = path.join(PWD, file_path);
 
-        log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher [${this.do.name}]`)
+        log.verbose(`Responding with raw data stream from file ${file_path} by dispatcher [${this.do.name}]`);
 
         //open file stream
 
@@ -141,24 +141,24 @@ export default class LanternTools {
 
         stream.on("data", buffer => {
             this.res.write(buffer);
-        })
+        });
 
         return await (new Promise(resolve => {
             stream.on("end", () => {
                 this.res.end();
                 resolve(true);
-            })
+            });
             stream.on("error", e => {
                 resolve(false);
-            })
+            });
         })).catch(e => {
-            console.log("thrown:1", e)
-        })
+            console.log("thrown:1", e);
+        });
     }
 
     async sendUTF8(file_path) {
         try {
-            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher [${this.do.name}]`)
+            log.verbose(`Responding with utf8 encoded data from file ${file_path} by dispatcher [${this.do.name}]`);
             this.res.end(await fsp.readFile(path.join(PWD, file_path), "utf8"), "utf8");
         } catch (e) {
             return false;
@@ -188,29 +188,29 @@ export default class LanternTools {
         return this.url.dir;
     }
 
-    redirect(new_url){
-        this.res.writeHead(301, {Location: new_url + ""})
+    redirect(new_url) {
+        this.res.writeHead(301, { Location: new_url + "" });
         this.res.end();
         return true;
     }
 
-    async respond(){
+    async respond() {
 
         let DISPATCH_SUCCESSFUL = false;
 
-        try{
-            DISPATCH_SUCCESSFUL  = await this.do.respond(this);
-        }catch(e){
+        try {
+            DISPATCH_SUCCESSFUL = await this.do.respond(this);
+        } catch (e) {
             log.error(`Response with dispatcher [${this.do.name}] failed: \n${e.stack}`);
         }
 
         return DISPATCH_SUCCESSFUL;
     }
 
-    error(error){
+    error(error) {
         console.log(error);
         return false;
     }
 }
 
-LanternTools.cache = new LanternTools()
+LanternTools.cache = new LanternTools();

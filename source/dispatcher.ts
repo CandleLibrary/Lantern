@@ -1,7 +1,7 @@
 import path from "path";
-import log from "./log.mjs";
-import default_dispatch from "./dispatchers/default_dispatch.mjs";
-import LanternTools from "./tools.mjs";
+import log from "./log.js";
+import default_dispatch from "./dispatchers/default_dispatch.js";
+import LanternTools from "./tools.js";
 import URL from "@candlefw/url";
 
 /** Error Messages ***/

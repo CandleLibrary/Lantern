@@ -1,4 +1,4 @@
-import data from "../data/404.data.mjs";
+import data from "../data/404.data.js";
 
 export default {
     name: "404",
@@ -10,4 +10,4 @@ export default {
         ext: 0xFFFFFFFF,
         dir: "*"
     }
-}
+};

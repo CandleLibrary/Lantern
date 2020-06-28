@@ -1,23 +1,23 @@
 const pollerCache = new Map();
 
 import fs from "fs";
-import log from "../log.mjs";
+import log from "../log.js";
 import path from "path";
-import watch from "node-watch"
+import watch from "node-watch";
 
 function watchPath(ID) {
     if (ID && !pollerCache.has(ID)) {
 
         pollerCache.set(ID, false);
 
-        const e = (n,e) => {
-            pollerCache.set(ID, true)
+        const e = (n, e) => {
+            pollerCache.set(ID, true);
         };
 
         if (ID) {
             for (const p of ID.split(";")) {
                 try {
-                    log(`Preparing watch of directory ${path.resolve(process.cwd(),p)}`);
+                    log(`Preparing watch of directory ${path.resolve(process.cwd(), p)}`);
                     watch(path.resolve(process.cwd(), p), { recursive: true }, e);
                 } catch (e) {
                     return false;
@@ -34,8 +34,8 @@ function watchPath(ID) {
 
 export default {
     name: "Auto-Load-Poller Loader",
-    description: 
-`Sends a poller js file that automatically polls the server to see 
+    description:
+        `Sends a poller js file that automatically polls the server to see 
 if files in specified directories have been changed, and then reloads 
 the page if changes have occured. 
 
@@ -46,7 +46,7 @@ To use, add to the HTML head tag:
 where {dirs} is a list of domain directories separated by semicolon
 [;].`,
     keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/" },
-    SILENT:0,
+    SILENT: 0,
     MIME: " application/ecmascript",
     respond: async (tools) => {
         const url = tools.url;
@@ -55,7 +55,7 @@ where {dirs} is a list of domain directories separated by semicolon
         if (ID) {
             if (!watchPath(ID)) {
                 tools.setMIME();
-                return tools.sendString(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`)
+                return tools.sendString(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`);
             }
         }
 
@@ -65,9 +65,9 @@ where {dirs} is a list of domain directories separated by semicolon
             const ID = data.id;
             const result = pollerCache.get(ID);
 
-            watchPath(ID)
+            watchPath(ID);
 
-            pollerCache.set(ID, false)
+            pollerCache.set(ID, false);
 
             tools.setMIMEBasedOnExt("json");
 
@@ -87,7 +87,7 @@ where {dirs} is a list of domain directories separated by semicolon
                             location.href = base_url + "";
                         }
                     }, ${rate});
-                `)
+                `);
         }
     }
-}
+};

@@ -1,13 +1,13 @@
 import http from "http";
 import path from "path";
-import dispatcher from "./dispatcher.mjs";
-import { AddDispatch } from "./dispatcher.mjs";
-import ext_map from "./extension_map.mjs";
-import { addKey } from "./extension_map.mjs";
-import log from "./log.mjs";
+import dispatcher from "./dispatcher.js";
+import { AddDispatch } from "./dispatcher.js";
+import ext_map from "./extension_map.js";
+import { addKey } from "./extension_map.js";
+import log from "./log.js";
 import resolve from "resolve";
 
-import poller_dispatch from "./dispatchers/poller_dispatch.mjs";
+import poller_dispatch from "./dispatchers/poller_dispatch.js";
 import candlefw_dispatch from "./dispatchers/candlefw_dispatch.js";
 import $404_dispatch from "./dispatchers/404_dispatch.js";
 
