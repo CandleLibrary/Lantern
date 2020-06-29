@@ -1,7 +1,7 @@
 import URL from "@candlefw/url";
 
-
-import log from "./log.js";
+import http2 from "http2";
+import log, { createLocalLog } from "./log.js";
 import default_dispatch from "./dispatchers/default_dispatch.js";
 import LanternTools from "./tools.js";
 import { Dispatcher } from "./types.js";
@@ -12,12 +12,12 @@ const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missi
 const e0x103 = "Dispatch object must have name. Error missing dispatch_object.name.";
 const e0x104 = "Dispatch object name must be a string. Error dispatch_object.name is not a string value.";
 
-async function respond(d_objs: Array<Dispatcher>, req, res, url, meta) {
+async function respond(d_objs: Array<Dispatcher>, stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, url, log) {
 
     for (let i = 0; i < d_objs.length; i++) {
         let do_ = d_objs[i];
 
-        const tools = new LanternTools(do_, req, res, meta, url);
+        const tools = new LanternTools(do_, stream, headers, url, log);
 
         switch (do_.response_type) {
 
@@ -30,7 +30,7 @@ async function respond(d_objs: Array<Dispatcher>, req, res, url, meta) {
             case 1:
                 tools.setStatusCode();
                 tools.setMIME(do_.MIME);
-                tools.sendUTF8String();
+                await tools.sendUTF8String();
                 return true;
         }
     }
@@ -38,11 +38,15 @@ async function respond(d_objs: Array<Dispatcher>, req, res, url, meta) {
     return false;
 }
 
-/** Root dispatch function **/
-export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
+function createURLFromConnection(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders): URL {
+    return new URL(headers[":scheme"] + "://" + headers[":authority"] + headers[":path"]);
+}
 
-    // Authenticated
-    const url = new URL(req.url),
+/** Root dispatch function **/
+export default async function dispatcher(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchMap, ext_map) {
+
+    // Authenticated   
+    const url = createURLFromConnection(stream, headers),
         dir = (url.dir == "/") ? "/" : url.dir,
         ext = url.ext;
 
@@ -55,33 +59,39 @@ export default async function dispatcher(req, res, meta, DispatchMap, ext_map) {
 
     const keys = dir.split("/");
 
-    let dispatch_object = null;
+    let dispatch_objects = null;
 
     for (let i = 0; i < keys.length; i++) {
         let key = `${ext_flag.toString(16)}${keys.slice(0, keys.length - i).join("/")}${i > 0 ? "/*" : "/"}`;
-        if ((dispatch_object = DispatchMap.get(key)))
+        if ((dispatch_objects = DispatchMap.get(key)))
             break;
     }
 
-    dispatch_object = dispatch_object || DispatchMap.get(base_key) || default_dispatch;
+    const local_log = createLocalLog(`Log of request for ${url}:`);
 
-    log.message(`Received request for "${req.url}", responding with dispatchers [${
-        dispatch_object
+    dispatch_objects = dispatch_objects || DispatchMap.get(base_key) || [default_dispatch];
+
+    local_log.message(`Responding with dispatchers [${
+        dispatch_objects
             .filter(dsp => typeof (dsp.SILENT) == "number" ? dsp.SILENT++ > 100 ? (dsp.SILENT = 0, true) : false : true)
             .map((dsp, i) => `${i + 1}: ${dsp.name}`)
             .join(", ")
         }]`);
 
-    return await respond(dispatch_object, req, res, url, meta);
+    const result = await respond(dispatch_objects, stream, headers, url, local_log);
+
+    local_log.delete();
+
+    return result;
 }
 
 
 
 /** Root dispatch function **/
-dispatcher.default = async function (code, req, res, meta, DispatchDefaultMap, ext_map) {
+dispatcher.default = async function (code, stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchDefaultMap, ext_map) {
     /** Extra Flags **/
     const
-        url = new URL(req.url),
+        url = createURLFromConnection(stream, headers),
         dir = (url.dir == "/") ? "/" : url.dir,
         ext = url.ext;
 
@@ -93,11 +103,13 @@ dispatcher.default = async function (code, req, res, meta, DispatchDefaultMap, e
     let extended_key = `${ext_flag.toString(16)}${code}${dir}`;
     let base_key = `${ext_flag.toString(16)}${code}`;
 
+    const local_log = createLocalLog(`Log of request for ${url}:`);
+
     let dispatch_object = DispatchDefaultMap.get(extended_key) || DispatchDefaultMap.get(base_key) || default_dispatch;
 
-    log.message(`Responding to request for "${req.url}" with code ${code}, using default dispatcher [${dispatch_object.name}]`);
+    local_log.message(`Responding to request for "${url}" with code ${code}, using default dispatcher [${dispatch_object.name}]`);
 
-    return await respond([dispatch_object], req, res, url, meta);
+    return await respond([dispatch_object], stream, headers, url, local_log);
 };
 
 function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {

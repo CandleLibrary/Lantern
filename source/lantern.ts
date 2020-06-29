@@ -1,5 +1,4 @@
-import http from "http";
-import https from "https";
+import http2 from "http2";
 import dispatcher from "./dispatcher.js";
 import { AddDispatch } from "./dispatcher.js";
 import ext_map from "./extension_map.js";
@@ -19,8 +18,9 @@ export {
 };
 
 export default async function lantern(
-    config: {
-        port?: number;
+    config_options: {
+        port?: number,
+        host?: string,
         server_name?: string,
         secure?: {
             key: string | URL,
@@ -29,7 +29,17 @@ export default async function lantern(
     } = {},
     CLI_RUN = false,
 
-): Promise<LanternServer<http.Server> | LanternServer<http.Server>> {
+): Promise<LanternServer<http2.Http2Server> | LanternServer<http2.Http2Server>> {
+
+    const {
+        port = 8080,
+        host = "localhost",
+        server_name = "Lantern",
+        secure = null/* {
+            key: "",
+            cert: "",
+        } */
+    } = config_options;
 
     await URL.polyfill();
 
@@ -38,40 +48,42 @@ export default async function lantern(
         DispatchMap = new Map(),
         DispatchDefaultMap = new Map();
 
-    //Using port 8080 by default
-    config.port = config.port || 8080;
+    log.verbose(`${server_name}: Configured to listen on interface ${host}:${port} `);
 
-    log.verbose(`${config.server_name || "Lantern"} set to listen on port ${config.port}`);
+    let lantern: LanternServer<http2.Http2Server> | LanternServer<http2.Http2SecureServer>;
 
-    let lantern: LanternServer<http.Server> | LanternServer<http.Server>;
+    const responseFunction = async (stream, headers) => {
 
-    const responseFunction = async (request, response) => {
-
-        const meta = { authorized: false };
 
         try {
-            if (!(await dispatcher(request, response, meta, DispatchMap, ext_map)))
-                dispatcher.default(404, request, response, meta, DispatchDefaultMap, ext_map);
+            if (!(await dispatcher(stream, headers, DispatchMap, ext_map)))
+                dispatcher.default(404, stream, headers, DispatchDefaultMap, ext_map);
         } catch (e) {
             log.error(e);
-            dispatcher.default(404, request, response, meta, DispatchDefaultMap, ext_map);
+            dispatcher.default(404, stream, headers, DispatchDefaultMap, ext_map);
         }
     };
 
-    if (config.secure) {
+    if (secure) {
 
-        const { key, cert } = config.secure,
+        log.verbose(`${server_name}: Using TSL secure protocol.`);
+
+        const { key, cert } = secure,
 
             options = {
                 key: key instanceof URL ? await key.fetchText() : key,
                 cert: cert instanceof URL ? await cert.fetchText() : cert,
             };
 
-        const server = https.createServer(options, responseFunction);
+        const server = http2.createSecureServer(options);
 
-        server.listen(config.port, () => { });
+        server.on("error", e => { log.error(e); });
 
-        lantern = <LanternServer<https.Server>>{
+        server.on("stream", responseFunction);
+
+        server.listen(port, host, () => { });
+
+        lantern = <LanternServer<http2.Http2SecureServer>>{
             ext: ext_map,
             server,
             addExtension: (key_name, mime_type) => addKey(key_name, ext_map),
@@ -81,11 +93,17 @@ export default async function lantern(
 
     } else {
 
-        const server = http.createServer(responseFunction);
+        const server = http2.createServer();
 
-        server.listen(config.port, () => { });
+        server.listen(port, host, () => { });
 
-        lantern = <LanternServer<http.Server>>{
+        server.on("error", e => { log.error(e); });
+
+        server.on("stream", responseFunction);
+
+        server.listen(port, host, () => { });
+
+        lantern = <LanternServer<http2.Http2Server>>{
             ext: ext_map,
             server,
             addExtension: (key_name, mime_type) => addKey(key_name, ext_map),

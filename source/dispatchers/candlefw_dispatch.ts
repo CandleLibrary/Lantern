@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { Dispatcher } from "../types";
+import ext_map from "../extension_map.js";
 
 const fsp = fs.promises;
 const CFW_NODE_DIR = path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../../../node_modules/@candlefw");
@@ -51,5 +52,5 @@ export default <Dispatcher>{
 
         return false;
     },
-    keys: { ext: 0x1, dir: "/cfw" }
+    keys: { ext: ext_map.all, dir: "/cfw" }
 };
