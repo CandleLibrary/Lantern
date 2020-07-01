@@ -29,6 +29,8 @@ export default class LanternTools implements Tools {
 
     private static cache: LanternTools;
 
+    private headers: any[];
+
 
     constructor(
         distribution_object: Dispatcher,
@@ -44,6 +46,7 @@ export default class LanternTools implements Tools {
             LanternTools.cache = tool.next;
         } else {
             tool = this;
+            tool.headers = [];
         }
 
         tool.do = distribution_object;
@@ -65,6 +68,7 @@ export default class LanternTools implements Tools {
         this.str = null;
         this.hdr = null;
         this._url = null;
+        this.headers.length = 0;
     }
 
     async readData() {
@@ -128,7 +132,8 @@ export default class LanternTools implements Tools {
     setMIME(MIME?: string) {
         if (MIME === undefined)
             MIME = this.do.MIME ? this.do.MIME : "text/plain";
-        this.str.respond({ "content-type": MIME.toString() });
+
+        this.headers.push(["content-type", MIME.toString()]);
     }
 
     setMIMEBasedOnExt(ext = "") {
@@ -142,7 +147,7 @@ export default class LanternTools implements Tools {
             if (mime) MIME = mime;
         }
 
-        this.str.respond({ "content-type": MIME });
+        this.headers.push(["content-type", MIME]);
     }
 
     /**
@@ -150,11 +155,20 @@ export default class LanternTools implements Tools {
      * @param code 
      */
     setStatusCode(code = this.do.response_code || 200) {
-        this.str.respond({ ":status": code + "" });
+        this.headers.push([":status", code]);
     }
 
     setCookie(cookie_name: any, cookie_value: any) {
-        this.str.respond({ "set-cookie": `${cookie_name}=${cookie_value}` });
+        this.headers.push(["set-cookie", `${cookie_name}=${cookie_value}`]);
+    }
+
+    sendHeaders() {
+        const headers = this.headers.reduce((r, v) => (r[v[0] + ""] = v[1], r), {});
+        this.str.respond(headers);
+    }
+
+    setHeader(key, value) {
+        this.headers.push([key + "", value]);
     }
 
     getHeader(header_name: string) {
@@ -176,6 +190,7 @@ export default class LanternTools implements Tools {
 
         try {
             const str = await fsp.readFile(loc, "utf8");
+            this.sendHeaders();
             this.str.write(str, "utf8");
             this.str.end();
             this._log.sub_message(`${this.do.name}: Responding with utf8 encoded data from file ${loc}`);
@@ -188,6 +203,7 @@ export default class LanternTools implements Tools {
 
     async sendUTF8String(str: string = <string>this.do.respond): Promise<boolean> {
         try {
+            this.sendHeaders();
             this.str.write(str, "utf8");
             this.str.end();
             this._log.sub_message(`${this.do.name}: Responding with utf8 string`);
@@ -200,6 +216,8 @@ export default class LanternTools implements Tools {
 
     async sendRawStreamFromFile(file_path: string): Promise<boolean> {
         const loc = path.isAbsolute(file_path) ? file_path : path.join(CWD, file_path);
+
+        this.sendHeaders();
 
         //open file stream
         const stream = fs.createReadStream(loc);
@@ -226,6 +244,29 @@ export default class LanternTools implements Tools {
             return false;
         });
     };
+
+    redirect(new_url: string) {
+
+        if (new_url + "" == this._url + "") {
+            this._log.sub_error(`${this.do.name}: No difference between redirected URL ${new_url} and original request URL.`);
+            return false;
+        }
+
+        this.setStatusCode(301);
+
+        this.setHeader("Location", new_url + "");
+
+        this.sendHeaders();
+
+        this.str.end();
+
+        return true;
+    }
+
+    log(...v) {
+        this._log.sub_message(...v);
+    }
+
     get filename(): string {
         return this._url.filename;
     }
@@ -266,26 +307,6 @@ export default class LanternTools implements Tools {
             case "POST": return "POST";
             default: return "GET";
         }
-    }
-
-    log(...v) {
-        this._log.sub_message(...v);
-    }
-
-    redirect(new_url: string) {
-
-        if (new_url + "" == this._url + "") {
-            this._log.sub_error(`${this.do.name}: No difference between redirected URL ${new_url} and original request URL.`);
-            return false;
-        }
-
-        this.setStatusCode(301);
-
-        this.str.respond({ "Location": new_url + "" });
-
-        this.str.end();
-
-        return true;
     }
 
     error(error: any) {
