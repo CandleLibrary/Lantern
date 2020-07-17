@@ -48,6 +48,8 @@ export interface Tools {
     setCookie(cookie_name: string, cookie_value: string);
     getHeader(header_name: string): string;
 
+    setHeader(header_name: string, header_value: string);
+
     /**
      * Retrieve the contents a file at `file_path`, using UTF-8 encoding,
      * and return a string of the contents. Returns an empty string if
