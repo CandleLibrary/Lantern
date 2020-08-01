@@ -73,8 +73,7 @@ export default class LanternTools implements Tools {
 
     async readData() {
 
-        if (this.data)
-            return this.data;
+        if (this.data) return this.data;
 
         return new Promise(res => {
 
@@ -88,9 +87,9 @@ export default class LanternTools implements Tools {
                 body += d;
             });
 
-            str.on("end", () => {
+            str.on("end", d => {
                 this.data = body;
-                res();
+                res(this.data);
             });
         });
     }
@@ -117,8 +116,12 @@ export default class LanternTools implements Tools {
     async getJSONasObject() {
 
         try {
-            if (this.data)
-                return JSON.parse(await this.readData());
+            const data = await this.readData();
+
+            if (data)
+                return JSON.parse(data);
+            else
+                return null;
         } catch (e) {
             this._log.error(e);
             return {};
