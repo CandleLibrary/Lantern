@@ -1,4 +1,7 @@
+import URL from "@candlefw/url";
+
 import http2 from "http2";
+
 import dispatcher from "./dispatcher.js";
 import { AddDispatch } from "./dispatcher.js";
 import ext_map from "./extension_map.js";
@@ -9,7 +12,7 @@ import poller_dispatch from "./dispatchers/poller_dispatch.js";
 import candlefw_dispatch from "./dispatchers/candlefw_dispatch.js";
 import $404_dispatch from "./dispatchers/404_dispatch.js";
 import { LanternServer, Dispatcher, DispatchKey } from "./types.js";
-import URL from "@candlefw/url";
+
 
 export {
     poller_dispatch,
