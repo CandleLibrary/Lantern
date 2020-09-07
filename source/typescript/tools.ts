@@ -89,7 +89,9 @@ export default class LanternTools implements Tools {
 
             str.on("end", d => {
                 this.data = body;
+
                 res(this.data);
+
             });
         });
     }
@@ -167,7 +169,8 @@ export default class LanternTools implements Tools {
 
     sendHeaders() {
         const headers = this.headers.reduce((r, v) => (r[v[0] + ""] = v[1], r), {});
-        this.str.respond(headers);
+        if (!this.str.closed)
+            this.str.respond(headers);
     }
 
     setHeader(key, value) {
@@ -180,7 +183,7 @@ export default class LanternTools implements Tools {
 
     async getUTF8FromFile(file_path: string): Promise<string> {
         try {
-            return await fsp.readFile(path.join(CWD, file_path), "utf8");
+            return await fsp.readFile(path.resolve(CWD, file_path), "utf8");
         } catch (e) {
             this._log.error(e);
             return "";
@@ -220,16 +223,19 @@ export default class LanternTools implements Tools {
     async sendRawStreamFromFile(file_path: string): Promise<boolean> {
         const loc = path.isAbsolute(file_path) ? file_path : path.join(CWD, file_path);
 
-        this.sendHeaders();
-
         //open file stream
         const stream = fs.createReadStream(loc);
 
-        stream.on("data", buffer => {
-            this.str.write(buffer);
-        });
-
         return await <Promise<boolean>>(new Promise(resolve => {
+
+            stream.on("open", (fd) => {
+                this.sendHeaders();
+            });
+
+            stream.on("data", buffer => {
+                this.str.write(buffer);
+            });
+
             stream.on("end", () => {
                 this.str.end();
                 stream.close();

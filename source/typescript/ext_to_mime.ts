@@ -33,6 +33,7 @@ enum MimeTypes {
 	js = "text/javascript",
 	json = "application/json",
 	jsonld = "application/ld+json",
+	map = "application/json",
 	mid = "application/ld+json",
 	midi = "audio/x-midi",
 	mjs = "text/javascript",

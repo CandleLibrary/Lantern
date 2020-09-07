@@ -1,7 +1,7 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.15-ts",
-  "description": "CFW Web Server",
+  "version": "0.0.15",
+  "description": "Extensible Web Server",
   "main": "./build/library/lantern.js",
   "types": "./build/types/lantern.d.ts",
   "type": "module",
@@ -9,8 +9,7 @@
     "lantern": "cli.js"
   },
   "scripts": {
-    "test": "mocha -r esm ./test/test.js",
-    "test.watch": "mocha -r esm ./test/test.js -w",
+    "test": "cfw.test -i ./test/...",
     "preversion": "yarn test"
   },
   "repository": {
@@ -27,17 +26,15 @@
   },
   "homepage": "https://github.com/candlefw/lantern#readme",
   "dependencies": {
-    "@candlefw/css": "0.1.6",
-    "@candlefw/glow": "0.2.0",
-    "@candlefw/hydrocarbon": "0.1.7",
-    "@candlefw/wind": "0.3.6-uni-id.0",
-    "@candlefw/wick": "0.8.13",
+    "@candlefw/css": "*",
+    "@candlefw/glow": "*",
+    "@candlefw/hydrocarbon": "*",
+    "@candlefw/wind": "*",
+    "@candlefw/wick": "*",
     "node-watch": "^0.6.3",
     "resolve": "^1.15.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "esm": "^3.2.25",
-    "mocha": "^7.0.1"
+    "@candlefw/test": "*"
   }
 }

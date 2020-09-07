@@ -42,34 +42,47 @@ function createURLFromConnection(stream: http2.ServerHttp2Stream, headers: http2
     return new URL(headers[":scheme"] + "://" + headers[":authority"] + headers[":path"]);
 }
 
-/** Root dispatch function **/
-export default async function dispatcher(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchMap, ext_map) {
 
+export function getDispatches(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchMap, ext_map):
+    Dispatcher[] {
     // Authenticated   
-    const url = createURLFromConnection(stream, headers),
+    const
+        url = createURLFromConnection(stream, headers),
         dir = (url.dir == "/") ? "/" : url.dir,
-        ext = url.ext;
+        ext = url.ext,
+        keys = dir.split("/");
 
-    let ext_flag = 1; // The "No Extension" value
+    let
+        ext_flag = 1, // The "No Extension" value
+        dispatch_objects = null;
 
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;
 
-    let base_key = `${ext_flag.toString(16)}`;
-
-    const keys = dir.split("/");
-
-    let dispatch_objects = null;
+    let dispatch_set: Set<Dispatcher> = new Set;
 
     for (let i = 0; i < keys.length; i++) {
-        let key = `${ext_flag.toString(16)}${keys.slice(0, keys.length - i).join("/")}${i > 0 ? "/*" : "/"}`;
-        if ((dispatch_objects = DispatchMap.get(key)))
-            break;
+        let key = `${ext_flag.toString(16)}${keys.slice(0, keys.length - i).join("/")}${i > 0 ? "/*" : "/"}`.replace(/\/\//g, "/");
+
+        for (const dispatch of DispatchMap.get(key) ?? [])
+            dispatch_set.add(dispatch);
     }
 
-    const local_log = createLocalLog(`Log of request for ${url}:`);
+    if (dispatch_set.size > 0)
+        return [...dispatch_set.values()];
+    return;
+}
 
-    dispatch_objects = dispatch_objects || DispatchMap.get(base_key) || [default_dispatch];
+/** Root dispatch function **/
+export default async function dispatcher(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchMap, ext_map) {
+
+    const
+        url = createURLFromConnection(stream, headers),
+        ext_flag = 1, // The "No Extension" value
+        base_key = `${ext_flag.toString(16)}`,
+        dispatch_objects = getDispatches(stream, headers, DispatchMap, ext_map) ?? DispatchMap.get(base_key) ?? [default_dispatch],
+        //Used to keep all relevant messages in one block of text when logging.
+        local_log = createLocalLog(`Log of request for ${url}:`);
 
     local_log.message(`Responding with dispatchers [${
         dispatch_objects
@@ -135,9 +148,8 @@ function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
 
 export function AddDispatch(DispatchMap, DefaultDispatchMap, ...dispatch_objects) {
 
-    for (let i = 0, l = dispatch_objects.length; i < l; i++) {
+    for (let i = 0, l = dispatch_objects.length; i < l; i++)
         AddCustomDispatch(dispatch_objects[i], DispatchMap, DefaultDispatchMap);
-    }
 
     return this;
 }
@@ -200,10 +212,10 @@ function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
 
     const width = process.stdout.columns - 1;
 
-    log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
+    //log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
 
     if (typeof (dispatch_object.MIME) !== "string") {
-        log.sub_message(`Using text/plain MIME type.`);
+        //      log.sub_message(`Using text/plain MIME type.`);
         dispatch_object.MIME = "text/plain";
     }
 

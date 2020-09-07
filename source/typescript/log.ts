@@ -1,15 +1,28 @@
-const log = (...m) => { console.log("\n", ...m, "\n"); };
-log.error = (...m) => { console.error(...m, "\n"); };
-log.verbose = (...m) => { console.log(...m, "\n"); };
+
+export type LanternLoggingOutput = {
+    log: (..._) => any,
+    error: (..._) => any,
+};
+
+let logger: LanternLoggingOutput = console;
+export function setLogger(l: LanternLoggingOutput = console) {
+    logger = l;
+}
+
+const log = (...m) => { logger.log("\n", ...m, "\n"); };
+log.error = (...m) => { logger.error(...m, "\n"); };
+log.verbose = (...m) => { logger.log(...m, "\n"); };
 log.message = log;
 log.subject = log;
-log.sub_message = (...m) => { console.log(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
-log.sub_error = (...m) => { console.error(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
+log.sub_message = (...m) => { logger.log(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
+log.sub_error = (...m) => { logger.error(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
 
 
 const local_log_queue = [];
 
 class Logger {
+
+    str_poly;
 
     identifier: string;
     messages: Array<string>;
@@ -19,7 +32,7 @@ class Logger {
         this.messages = [];
     }
     delete() {
-        console.log("\n", this.identifier, this.messages
+        logger.log("\n", this.identifier, this.messages
             .map((str, i) => i > 0 ? "\t" + str : str)
             .join("\n"));
 

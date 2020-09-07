@@ -69,6 +69,6 @@ export default <Dispatcher>{
     keys:
     {
         ext: 0xFFFFFFFF,
-        dir: "*"
+        dir: "/*"
     }
 };

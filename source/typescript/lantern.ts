@@ -6,7 +6,7 @@ import dispatcher from "./dispatcher.js";
 import { AddDispatch } from "./dispatcher.js";
 import ext_map from "./extension_map.js";
 import { addKey } from "./extension_map.js";
-import log from "./log.js";
+import log, { setLogger, LanternLoggingOutput } from "./log.js";
 
 import poller_dispatch from "./dispatchers/poller_dispatch.js";
 import candlefw_dispatch from "./dispatchers/candlefw_dispatch.js";
@@ -30,9 +30,11 @@ export default async function lantern(
             cert: string | URL;
         };
     } = {},
-    CLI_RUN = false,
+    logger?: LanternLoggingOutput
 
 ): Promise<LanternServer<http2.Http2Server> | LanternServer<http2.Http2Server>> {
+
+    setLogger(logger);
 
     const {
         port = 8080,
@@ -44,7 +46,7 @@ export default async function lantern(
         } */
     } = config_options;
 
-    await URL.polyfill();
+    await URL.server();
 
     /* Routes HTTP request depending on active dispatch modules. */
     const
@@ -57,7 +59,6 @@ export default async function lantern(
 
     const responseFunction = async (stream, headers) => {
 
-
         try {
             if (!(await dispatcher(stream, headers, DispatchMap, ext_map)))
                 dispatcher.default(404, stream, headers, DispatchDefaultMap, ext_map);
@@ -68,8 +69,6 @@ export default async function lantern(
     };
 
     if (secure) {
-
-        log.verbose(`${server_name}: Using TSL secure protocol.`);
 
         const { key, cert } = secure,
 
@@ -94,11 +93,11 @@ export default async function lantern(
             close: server.close.bind(server)
         };
 
+        log.verbose(`${server_name}: Using HTTPS/TLS secure protocol.`);
+
     } else {
 
         const server = http2.createServer();
-
-        server.listen(port, host, () => { });
 
         server.on("error", e => { log.error(e); });
 
@@ -113,6 +112,8 @@ export default async function lantern(
             addDispatch: (...v) => AddDispatch(DispatchMap, DispatchDefaultMap, ...v),
             close: server.close.bind(server)
         };
+
+        log.verbose(`${server_name}: Using unsecured HTTP transport`);
     }
 
     lantern.addDispatch.bind(lantern);
