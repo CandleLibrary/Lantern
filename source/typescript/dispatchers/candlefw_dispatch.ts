@@ -5,7 +5,7 @@ import ext_map from "../extension_map.js";
 import { getPackageJsonObject } from "@candlefw/wax";
 import URL from "@candlefw/url";
 
-
+const fsp = fs.promises;
 let READY = false;
 let CFW_DIR = "";
 
@@ -17,16 +17,22 @@ async function Set() {
 
     const { FOUND, package_dir } = await getPackageJsonObject(URL.getEXEURL(import.meta).path);
 
-    CFW_DIR = path.join(package_dir, "node_modules/@candlefw/");
+    const candidate_dir = package_dir.split("/");
 
-    console.log(CFW_DIR);
+    //figure out if the directory exists
+    let found = false;
+
+    while (!found && candidate_dir.length > 1) {
+        CFW_DIR = path.join(candidate_dir.join("/"), "node_modules/@candlefw/");
+        try {
+            const data = await fsp.readdir(CFW_DIR);
+            found = true;
+        } catch (e) { }
+        candidate_dir.pop();
+    }
 
     READY = true;
 }
-
-const fsp = fs.promises;
-
-const CFW_NODE_DIR = path.resolve(import.meta.url.replace(process.platform == "win32" ? /file\:\/\/\// : /file\:\/\//g, ""), "../../../../node_modules/@candlefw");
 
 export default <Dispatcher>{
     name: "CFW Builtins DEV",
@@ -51,11 +57,15 @@ export default <Dispatcher>{
             dir = url.path,
             dir_sections = dir.split("/");
 
+        if (dir_sections[1] == "cfw")
+            dir_sections.splice(0, 1);
+
         if (dir_sections[1] == "@candlefw")
             dir_sections.splice(1, 1);
 
         const pkg = dir_sections[1],
             source_name = {
+                "wickrt": "wick",
                 "wick": "wick",
                 "url": "url",
                 "glow": "glow",
@@ -88,7 +98,7 @@ export default <Dispatcher>{
         if (return_path !== "") {
             const str = await tools.getUTF8FromFile(return_path);
             tools.setMIMEBasedOnExt(ext || "js");
-            return tools.sendUTF8String(str.replace(/\@candlefw/g, "/@candlefw"));
+            return tools.sendUTF8String(str.replace(/\"\@candlefw\/([^\/\"]+)/g, "\"/cfw\/$1/"));
         }
 
         return false;
