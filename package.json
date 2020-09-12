@@ -9,8 +9,9 @@
     "lantern": "cli.js"
   },
   "scripts": {
-    "test": "cfw.test -i ./test/...",
-    "preversion": "yarn test"
+    "prepublishOnly": "tsc -p ./tsconfig.json && yarn.test",
+    "test": "cfw.test ./test/**",
+    "test.watch": "cfw.test -w ./test/**"
   },
   "repository": {
     "type": "git",
@@ -26,13 +27,17 @@
   },
   "homepage": "https://github.com/candlefw/lantern#readme",
   "dependencies": {
+    "@candlefw/url": "*",
+    "@candlefw/cfw": "*",
+    "@candlefw/spark": "*",
+    "@candlefw/conflagrate": "*",
+    "@candlefw/js": "*",
     "@candlefw/css": "*",
     "@candlefw/glow": "*",
     "@candlefw/hydrocarbon": "*",
     "@candlefw/wind": "*",
     "@candlefw/wick": "*",
-    "node-watch": "^0.6.3",
-    "resolve": "^1.15.1"
+    "node-watch": "^0.6.3"
   },
   "devDependencies": {
     "@candlefw/test": "*"
