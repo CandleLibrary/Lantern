@@ -1,25 +1,28 @@
 import log from "./log.js";
 
 const common_extension =
-	[
-		"none",
-		"html",
-		"xhtml",
-		"xml",
-		"svg",
-		"css",
-		"sass",
-		"json",
-		"js",
-		"png",
-		"jpg",
-		"tif",
-		"gif",
-		"php"
-	];
+{
+	"none": 0,
+	"html": 0,
+	"xhtml": 0,
+	"xml": 0,
+	"svg": 0,
+	"css": 0,
+	"sass": 0,
+	"json": 0,
+	"js": 0,
+	"png": 0,
+	"jpg": 0,
+	"tif": 0,
+	"gif": 0,
+	"php": 0
+};
 
+type ext_map = { [i in keyof typeof common_extension]: number; };
 
-const ext_map = common_extension.reduce((a, e, i) => (a[e] = 1 << (i), a), {});
+const extension_array = Object.entries(common_extension);
+
+const ext_map: ext_map = <any>extension_array.reduce((a, [e], i) => (a[e] = 1 << (i), a), {});
 
 //@ts-ignore
 ext_map.any = 0x80000000;
@@ -27,7 +30,7 @@ ext_map.any = 0x80000000;
 //@ts-ignore
 ext_map.all = 0xFFFFFFFF;
 
-let key_offset = common_extension.length;
+let key_offset = extension_array.length;
 
 export function addKey(key, ext_map) {
 
@@ -39,4 +42,4 @@ export function addKey(key, ext_map) {
 	return ext_map[key] || 0xFFFFFFFF;
 }
 
-export default ext_map;
+export default <ext_map & any>ext_map;

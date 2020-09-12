@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Extensible Web Server",
   "main": "./build/library/lantern.js",
   "types": "./build/types/lantern.d.ts",
@@ -9,8 +9,8 @@
     "lantern": "cli.js"
   },
   "scripts": {
-    "prepublishOnly": "tsc -p ./tsconfig.json && yarn.test",
-    "test": "cfw.test ./test/**",
+    "prepublishOnly": "tsc -p ./tsconfig.json && yarn test",
+    "test": "cfw.test  --headless ./test/**",
     "test.watch": "cfw.test -w ./test/**"
   },
   "repository": {
