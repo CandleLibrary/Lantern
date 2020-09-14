@@ -57,10 +57,14 @@ export interface LanternConstructor {
      * Ports are within the range 49152 and 65535.
      */
     getUnusedPort: (max_attempts?: number, cb?) => Promise<number>;
-};
-let temp_lantern_ref = null;
 
-const lantern: LanternConstructor = Object.assign((temp_lantern_ref = async function (
+    /**
+     * A logger function that outputs nothing
+     */
+    null_logger: (...str: string[]) => void;
+};
+
+const lantern: LanternConstructor = Object.assign(async function (
     config_options: LanternConstructorOptions,
     logger?: LanternLoggingOutput
 ): Promise<LanternServer<http2.Http2Server> | LanternServer<http2.Http2Server>> {
@@ -79,7 +83,8 @@ const lantern: LanternConstructor = Object.assign((temp_lantern_ref = async func
                 type: "http",
                 host: "localhost",
                 secure: null,
-                server_name: "Local HTTP Server"
+                server_name: "Local HTTP Server",
+                log: console.log
             },
             (FOUND && _pkg["@lantern"]) || {},
             config_options
@@ -107,9 +112,10 @@ const lantern: LanternConstructor = Object.assign((temp_lantern_ref = async func
         };
 
     return tool_set.createServer(options, responseFunction);
-}), {
+}, {
     mock_certificate,
-    getUnusedPort
+    getUnusedPort,
+    null_logger: _ => _
 });
 
 

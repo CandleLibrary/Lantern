@@ -12,7 +12,7 @@ export function createLanternServer<K>(options: LanternConstructorOptions, socke
 
     /* Routes HTTP request depending on active dispatch modules. */
     const
-        log_queue = new LogQueue(console),
+        log_queue = new LogQueue(options.log),
         DispatchMap = new Map(),
         DispatchDefaultMap = new Map(),
         lantern = <LanternServer<K>>{

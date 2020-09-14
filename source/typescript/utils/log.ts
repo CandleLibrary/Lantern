@@ -29,7 +29,7 @@ export class Logger {
 
     next: Logger;
 
-    logger: Console;
+    logger: (...str: string[]) => void;
 
     private delete_fn: (arg: Logger) => void;
 
@@ -41,7 +41,7 @@ export class Logger {
     }
     delete() {
         if (this.messages.length > 0)
-            this.logger.log("\n", this.identifier, this.messages
+            this.logger("\n", this.identifier, this.messages
                 .map((str, i) => i > 0 ? "\t" + str : str)
                 .join("\n"));
 
@@ -69,8 +69,8 @@ export class LogQueue {
 
     queue: Logger;
 
-    logger: Console;
-    constructor(log: Console) {
+    logger: (...str: string[]) => void;
+    constructor(log: (...str: string[]) => void) {
         this.logger = log;
         this.createLocalLog("").delete();
     }

@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Extensible Web Server",
   "main": "./build/library/lantern.js",
   "types": "./build/types/lantern.d.ts",

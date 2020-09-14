@@ -26,4 +26,9 @@ export interface LanternConstructorOptions {
         key: string | URL;
         cert: string | URL;
     };
+
+    /**
+     * Any function that can log string data
+     */
+    log?(...str: string[]): void;
 }
