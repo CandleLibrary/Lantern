@@ -12,9 +12,9 @@ const port1 = await lantern.getUnusedPort();
 const port2 = await lantern.getUnusedPort();
 const port_min = 49152, port_max = 65535;
 
-const serverA = await lantern({ port: port1 }, { error: _ => _, log: _ => _ });
+const serverA = await lantern({ port: port1, type: "http2", secure: lantern.mock_certificate }, { error: _ => _, log: _ => _ });
 
-const serverB = await lantern({ port: port2 }, { error: _ => _, log: _ => _ });
+const serverB = await lantern({ port: port2, type: "http" }, { error: _ => _, log: _ => _ });
 
 assert_group(sequence, () => {
     await spark.sleep(10);

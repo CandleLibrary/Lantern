@@ -4,7 +4,8 @@ import http2 from "http2";
 import log, { createLocalLog } from "./log.js";
 import default_dispatch from "./dispatchers/default_dispatch.js";
 import LanternTools from "./tools.js";
-import { Dispatcher } from "./types.js";
+import { Dispatcher, ToolSet, RequestData } from "./types.js";
+import LanternToolsBase from "./tools.js";
 
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
@@ -12,25 +13,26 @@ const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missi
 const e0x103 = "Dispatch object must have name. Error missing dispatch_object.name.";
 const e0x104 = "Dispatch object name must be a string. Error dispatch_object.name is not a string value.";
 
-async function respond(d_objs: Array<Dispatcher>, stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, url, log) {
+async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, request_data: RequestData, log) {
 
     for (let i = 0; i < d_objs.length; i++) {
         let do_ = d_objs[i];
 
-        const tools = new LanternTools(do_, stream, headers, url, log);
+        //@ts-ignore
+        const tool_box = tool_set.createToolbox(do_, request_data, log);
 
         switch (do_.response_type) {
 
             case 0:
-                const SUCCESS = await tools.respond();
-                tools.destroy();
+                const SUCCESS = await tool_box.respond();
+                tool_box.destroy();
                 if (SUCCESS) return SUCCESS;
                 break;
 
             case 1:
-                tools.setStatusCode();
-                tools.setMIME(do_.MIME);
-                await tools.sendUTF8String();
+                tool_box.setStatusCode();
+                tool_box.setMIME(do_.MIME);
+                await tool_box.sendUTF8String();
                 return true;
         }
     }
@@ -43,11 +45,11 @@ function createURLFromConnection(stream: http2.ServerHttp2Stream, headers: http2
 }
 
 
-export function getDispatches(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchMap, ext_map):
+export function getDispatches(request_data: RequestData, DispatchMap, ext_map):
     Dispatcher[] {
     // Authenticated   
     const
-        url = createURLFromConnection(stream, headers),
+        url: URL = request_data.url,
         dir = (url.dir == "/") ? "/" : url.dir,
         ext = url.ext,
         keys = dir.split("/");
@@ -74,13 +76,13 @@ export function getDispatches(stream: http2.ServerHttp2Stream, headers: http2.In
 }
 
 /** Root dispatch function **/
-export default async function dispatcher(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchMap, ext_map) {
+export default async function dispatcher<T>(tool_set, request_data: RequestData, DispatchMap, ext_map) {
 
     const
-        url = createURLFromConnection(stream, headers),
+        url = request_data.url,
         ext_flag = 1, // The "No Extension" value
         base_key = `${ext_flag.toString(16)}`,
-        dispatch_objects = getDispatches(stream, headers, DispatchMap, ext_map) ?? DispatchMap.get(base_key) ?? [default_dispatch],
+        dispatch_objects = getDispatches(request_data, DispatchMap, ext_map) ?? DispatchMap.get(base_key) ?? [default_dispatch],
         //Used to keep all relevant messages in one block of text when logging.
         local_log = createLocalLog(`Log of request for ${url}:`);
 
@@ -91,7 +93,7 @@ export default async function dispatcher(stream: http2.ServerHttp2Stream, header
             .join(", ")
         }]`);
 
-    const result = await respond(dispatch_objects, stream, headers, url, local_log);
+    const result = await respond(dispatch_objects, tool_set, request_data, local_log);
 
     local_log.delete();
 
@@ -101,10 +103,10 @@ export default async function dispatcher(stream: http2.ServerHttp2Stream, header
 
 
 /** Root dispatch function **/
-dispatcher.default = async function (code, stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders, DispatchDefaultMap, ext_map) {
+dispatcher.default = async function (code, tool_set, request_data, DispatchDefaultMap, ext_map) {
     /** Extra Flags **/
     const
-        url = createURLFromConnection(stream, headers),
+        url = request_data.url,
         dir = (url.dir == "/") ? "/" : url.dir,
         ext = url.ext;
 
@@ -122,7 +124,7 @@ dispatcher.default = async function (code, stream: http2.ServerHttp2Stream, head
 
     local_log.message(`Responding to request for "${url}" with code ${code}, using default dispatcher [${dispatch_object.name}]`);
 
-    return await respond([dispatch_object], stream, headers, url, local_log);
+    return await respond([dispatch_object], tool_set, request_data, local_log);
 };
 
 function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
@@ -148,8 +150,8 @@ function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
 
 export function AddDispatch(DispatchMap, DefaultDispatchMap, ...dispatch_objects) {
 
-    for (let i = 0, l = dispatch_objects.length; i < l; i++)
-        AddCustomDispatch(dispatch_objects[i], DispatchMap, DefaultDispatchMap);
+    for (const dispatch_object of dispatch_objects)
+        AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap);
 
     return this;
 }
@@ -212,7 +214,7 @@ function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
 
     const width = process.stdout.columns - 1;
 
-    //log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
+    log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
 
     if (typeof (dispatch_object.MIME) !== "string") {
         //      log.sub_message(`Using text/plain MIME type.`);

@@ -7,6 +7,7 @@
  */
 import { AddDispatch, getDispatches } from "@candlefw/lantern/build/library/dispatcher.js";
 import ext_map from "@candlefw/lantern/build/library/extension_map.js";
+import URL from "@candlefw/url";
 
 const
     DispatchMap = new Map(),
@@ -35,21 +36,16 @@ AddDispatch(DispatchMap, DispatchDefaultMap,
     }
 );
 
-const
-    hdr_poly = {
-        ":scheme": "http",
-        ":authority": "localhost",
-        ":path": "/img/test.png"
-    };
+let urlA = new URL("http://localhost/img/test.png");
 
-function getDispatchName(hdr_poly) {
-    return (getDispatches({}, hdr_poly, DispatchMap, ext_map) ?? []).map(d => d.name);
+function getDispatchName(url) {
+    return (getDispatches({ url }, DispatchMap, ext_map) ?? []).map(d => d.name);
 }
 
 "/img/test.png";
-assert(getDispatchName(hdr_poly) == ['Images', 'AllImages', 'LastResort']);
+assert(getDispatchName(urlA) == ['Images', 'AllImages', 'LastResort']);
 
-hdr_poly[":path"] = "/img/png/test.png";
+urlA = new URL("http://localhost/img/png/test.png");
 
 "/img/png/test.png";
-assert(getDispatchName(hdr_poly) == ['Images', 'AllImages', 'LastResort']);
+assert(getDispatchName(urlA) == ['Images', 'AllImages', 'LastResort']);

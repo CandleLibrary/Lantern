@@ -1,4 +1,6 @@
 import URL from "@candlefw/url";
+import { LanternConstructorOptions } from "./constructor_options";
+import { ResponseFunction } from "./ResponseFunction";
 
 
 export interface LanternServer<server_type> {
@@ -10,13 +12,15 @@ export interface LanternServer<server_type> {
 }
 
 
-export interface Tools {
+export interface ToolSet {
+    /**Test */
+
     /**
      * Returns and object of the request data parsed as
      * a JSON object.
      */
     getJSONasObject(): Promise<any>;
-    getCookie();
+    getCookie(cookie_name: string): string;
 
     /**
      * Set the response MIME header to the MIME string value. The default mime type is
@@ -161,5 +165,12 @@ export interface Dispatcher {
      * response code `200` (if Dispatcher.response_code is not set) and
      * MIME type `text/plain` (if Dispatcher.MIME is not set)
      */
-    respond: ((tools: Tools) => Promise<boolean>) | string;
+    respond: ((tools: ToolSet) => Promise<boolean>) | string;
+}
+
+export interface RequestData {
+    /**
+     * URL of the requested resource
+     */
+    url: URL;
 }
