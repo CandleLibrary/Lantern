@@ -1,11 +1,10 @@
 const pollerCache = new Map();
-import log from "../log.js";
 import path from "path";
 import watch from "node-watch";
-import { Dispatcher } from "../types";
+import { Dispatcher, ToolSet } from "../types/types";
 
 
-function watchPath(ID) {
+function watchPath(ID, tools: ToolSet) {
     if (ID && !pollerCache.has(ID)) {
 
         pollerCache.set(ID, false);
@@ -17,14 +16,14 @@ function watchPath(ID) {
         if (ID) {
             for (const p of ID.split(";")) {
                 try {
-                    log(`Preparing watch of directory ${path.resolve(process.cwd(), p)}`);
+                    tools.log(`Preparing watch of directory ${path.resolve(process.cwd(), p)}`);
                     watch(path.resolve(process.cwd(), p), { recursive: true }, e);
                 } catch (e) {
                     return false;
                 }
             }
         } else {
-            log(`Preparing watch for dir ${"./"}`);
+            tools.log(`Preparing watch for dir ${"./"}`);
             watch("./", { recursive: true, persistent: false }, e);
         }
     }
@@ -43,8 +42,7 @@ To use, add to the HTML head tag:
     
     <script type="module" src="/lantern-poll/?{dirs}"></script>
 
-where {dirs} is a list of domain directories separated by semicolon
-[;].`,
+where {dirs} is a list of domain directories separated by a semicolon [;]`,
     keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/" },
     SILENT: 0,
     MIME: " application/ecmascript",
@@ -53,7 +51,7 @@ where {dirs} is a list of domain directories separated by semicolon
         const ID = url.query;
 
         if (ID) {
-            if (!watchPath(ID)) {
+            if (!watchPath(ID, tools)) {
                 tools.setMIME();
                 return tools.sendUTF8FromFile(`(e=>{throw("Lantern Poller Error: Could not find dir for [${path}]")})()`);
             }
@@ -65,7 +63,7 @@ where {dirs} is a list of domain directories separated by semicolon
             const ID = data.id;
             const result = pollerCache.get(ID);
 
-            watchPath(ID);
+            watchPath(ID, tools);
 
             pollerCache.set(ID, false);
 

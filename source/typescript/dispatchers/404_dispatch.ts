@@ -1,4 +1,4 @@
-import { Dispatcher } from "../types";
+import { Dispatcher } from "../types/types";
 
 /**
 	Credit: https://github.com/h5bp/html5-boilerplate

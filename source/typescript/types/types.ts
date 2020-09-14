@@ -1,15 +1,4 @@
 import URL from "@candlefw/url";
-import { LanternConstructorOptions } from "./constructor_options";
-import { ResponseFunction } from "./ResponseFunction";
-
-
-export interface LanternServer<server_type> {
-    addExtension: (key_name: string, mime_type: string) => void;
-    addDispatch: (...v: Array<Dispatcher>) => void;
-    server: server_type;
-    ext: any,
-    close: () => void;
-}
 
 
 export interface ToolSet {
@@ -93,6 +82,8 @@ export interface ToolSet {
 
     redirect(new_url: string | URL): boolean;
     error(error): void;
+
+    log(message: string): void;
 }
 
 export interface DispatchKey {
@@ -168,9 +159,4 @@ export interface Dispatcher {
     respond: ((tools: ToolSet) => Promise<boolean>) | string;
 }
 
-export interface RequestData {
-    /**
-     * URL of the requested resource
-     */
-    url: URL;
-}
+

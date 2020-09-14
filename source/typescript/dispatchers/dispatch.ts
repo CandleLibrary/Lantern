@@ -1,11 +1,11 @@
 import URL from "@candlefw/url";
 
 import http2 from "http2";
-import log, { createLocalLog } from "./log.js";
-import default_dispatch from "./dispatchers/default_dispatch.js";
-import LanternTools from "./tools.js";
-import { Dispatcher, ToolSet, RequestData } from "./types.js";
-import LanternToolsBase from "./tools.js";
+import default_dispatch from "./default_dispatch.js";
+import { Dispatcher, ToolSet } from "../types/types.js";
+import { RequestData } from "../types/request_data";
+import LanternToolsBase from "../tool_set/tools.js";
+import { LogQueue } from "../utils/log.js";
 
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
@@ -33,17 +33,13 @@ async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, re
                 tool_box.setStatusCode();
                 tool_box.setMIME(do_.MIME);
                 await tool_box.sendUTF8String();
+                tool_box.destroy();
                 return true;
         }
     }
 
     return false;
 }
-
-function createURLFromConnection(stream: http2.ServerHttp2Stream, headers: http2.IncomingHttpHeaders): URL {
-    return new URL(headers[":scheme"] + "://" + headers[":authority"] + headers[":path"]);
-}
-
 
 export function getDispatches(request_data: RequestData, DispatchMap, ext_map):
     Dispatcher[] {
@@ -76,7 +72,7 @@ export function getDispatches(request_data: RequestData, DispatchMap, ext_map):
 }
 
 /** Root dispatch function **/
-export default async function dispatcher<T>(tool_set, request_data: RequestData, DispatchMap, ext_map) {
+export default async function dispatcher<T>(tool_set, request_data: RequestData, log_queue: LogQueue, DispatchMap, ext_map) {
 
     const
         url = request_data.url,
@@ -84,7 +80,7 @@ export default async function dispatcher<T>(tool_set, request_data: RequestData,
         base_key = `${ext_flag.toString(16)}`,
         dispatch_objects = getDispatches(request_data, DispatchMap, ext_map) ?? DispatchMap.get(base_key) ?? [default_dispatch],
         //Used to keep all relevant messages in one block of text when logging.
-        local_log = createLocalLog(`Log of request for ${url}:`);
+        local_log = log_queue.createLocalLog(`Log of request for ${url}:`);
 
     local_log.message(`Responding with dispatchers [${
         dispatch_objects
@@ -103,7 +99,7 @@ export default async function dispatcher<T>(tool_set, request_data: RequestData,
 
 
 /** Root dispatch function **/
-dispatcher.default = async function (code, tool_set, request_data, DispatchDefaultMap, ext_map) {
+dispatcher.default = async function (code, tool_set, request_data: RequestData, log_queue: LogQueue, DispatchMap, ext_map) {
     /** Extra Flags **/
     const
         url = request_data.url,
@@ -118,13 +114,17 @@ dispatcher.default = async function (code, tool_set, request_data, DispatchDefau
     let extended_key = `${ext_flag.toString(16)}${code}${dir}`;
     let base_key = `${ext_flag.toString(16)}${code}`;
 
-    const local_log = createLocalLog(`Log of request for ${url}:`);
+    const local_log = log_queue.createLocalLog(`Log of request for ${url}:`);
 
-    let dispatch_object = DispatchDefaultMap.get(extended_key) || DispatchDefaultMap.get(base_key) || default_dispatch;
+    let dispatch_object = DispatchMap.get(extended_key) || DispatchMap.get(base_key) || default_dispatch;
 
     local_log.message(`Responding to request for "${url}" with code ${code}, using default dispatcher [${dispatch_object.name}]`);
 
-    return await respond([dispatch_object], tool_set, request_data, local_log);
+    const result = await respond([dispatch_object], tool_set, request_data, local_log);
+
+    local_log.delete();
+
+    return result;
 };
 
 function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
@@ -148,15 +148,17 @@ function SetDispatchMap(dir, dispatch_object, ext, DispatchMap) {
     }
 }
 
-export function AddDispatch(DispatchMap, DefaultDispatchMap, ...dispatch_objects) {
+export function AddDispatch(log_queue: LogQueue, DispatchMap, DefaultDispatchMap, ...dispatch_objects) {
 
     for (const dispatch_object of dispatch_objects)
-        AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap);
+        AddCustomDispatch(log_queue, dispatch_object, DispatchMap, DefaultDispatchMap);
 
     return this;
 }
 
-function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
+function AddCustomDispatch(log_queue: LogQueue, dispatch_object, DispatchMap, DefaultDispatchMap) {
+
+    const log = log_queue.createLocalLog("DISPATCH_MAP");
 
     let
         Keys = dispatch_object.keys,
@@ -172,20 +174,21 @@ function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
         if (t_o_r == "string") {
             dispatch_object.response_type = 1;
         } else
-            return log.error(`[${Name}] ${e0x101}`);
+            return log.sub_error(`[${Name}] ${e0x101}`).delete();
     }
 
     if (typeof (Keys) == "undefined")
-        return log.error(`[${Name}] ${e0x102}`);
+        return log.sub_error(`[${Name}] ${e0x102}`).delete();
 
     if (typeof (Name) == "undefined")
-        return log.error(`[${Name}] ${e0x103}`);
+        return log.sub_error(`[${Name}] ${e0x103}`).delete();
 
     if (typeof (Name) !== "string") {
         if (typeof (Name) == "number") {
-            return AddDefaultDispatch(dispatch_object, DefaultDispatchMap);
+            log.delete();
+            return AddDefaultDispatch(log_queue, dispatch_object, DefaultDispatchMap);
         }
-        return log.error(`[${Name}] ${e0x104}`);
+        return log.sub_error(`[${Name}] ${e0x104}`).delete();
     }
 
     const keys = Array.isArray(Keys) ? Keys : [Keys];
@@ -196,7 +199,7 @@ function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
         const ext = Key.ext;
 
         if (typeof (ext) !== "number")
-            return log.error("dispatch_object.key.ext must be a numerical value");
+            return log.sub_error("dispatch_object.key.ext must be a numerical value").delete();
 
 
         const dir_array = Key.dir.split("/");
@@ -216,15 +219,17 @@ function AddCustomDispatch(dispatch_object, DispatchMap, DefaultDispatchMap) {
 
     log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
 
-    if (typeof (dispatch_object.MIME) !== "string") {
-        //      log.sub_message(`Using text/plain MIME type.`);
+    if (typeof (dispatch_object.MIME) !== "string")
         dispatch_object.MIME = "text/plain";
-    }
+
+    log.delete();
 
     return this;
 }
 
-function AddDefaultDispatch(dispatch_object, DispatchDefaultMap) {
+function AddDefaultDispatch(log_queue: LogQueue, dispatch_object, DispatchDefaultMap) {
+
+    const log = log_queue.createLocalLog("DISPATCH_MAP");
 
     let Keys = dispatch_object.keys;
     let Name = dispatch_object.name;
@@ -233,7 +238,7 @@ function AddDefaultDispatch(dispatch_object, DispatchDefaultMap) {
     const dir = Keys.dir;
 
     if (typeof (ext) !== "number")
-        return log.error("dispatch_object.key.ext must be a numerical value");
+        return log.sub_error("dispatch_object.key.ext must be a numerical value").delete();
 
     for (let i = 1; i !== 0x10000000; i = (i << 1)) {
 
@@ -248,4 +253,6 @@ function AddDefaultDispatch(dispatch_object, DispatchDefaultMap) {
             DispatchDefaultMap.set(dispatch_key, dispatch_object);
         }
     }
+
+    log.delete();
 }

@@ -2,17 +2,26 @@ import URL from "@candlefw/url";
 import { getPackageJsonObject } from "@candlefw/wax";
 
 import http2 from "http2";
-import { LanternConstructorOptions } from "./constructor_options";
+
 import mock_certificate from "./data/mock_certificate.js";
-import dispatcher from "./dispatcher.js";
 import $404_dispatch from "./dispatchers/404_dispatch.js";
 import candlefw_dispatch from "./dispatchers/candlefw_dispatch.js";
+import dispatcher from "./dispatchers/dispatch.js";
 import poller_dispatch from "./dispatchers/poller_dispatch.js";
-import ext_map from "./extension_map.js";
-import { getUnusedPort } from "./getUnusedPort.js";
-import log, { LanternLoggingOutput, setLogger } from "./log.js";
-import LanternToolsBase, { HTTPS2ToolSet, HTTPSToolSet } from "./tools.js";
-import { Dispatcher, DispatchKey, LanternServer, RequestData, ToolSet } from "./types.js";
+import ext_map from "./extension/extension_map.js";
+
+import { HTTPS2ToolSet } from "./tool_set/http2_tool_set.js";
+import { HTTPSToolSet } from "./tool_set/http_tool_set.js";
+import LanternToolsBase from "./tool_set/tools.js";
+
+import { LanternConstructorOptions } from "./types/constructor_options";
+import { LanternServer } from "./types/lantern_server";
+import { RequestData } from "./types/request_data";
+import { Dispatcher, DispatchKey, ToolSet } from "./types/types.js";
+
+import { getUnusedPort } from "./utils/get_unused_port.js";
+import { LanternLoggingOutput, setLogger, LogQueue } from "./utils/log.js";
+
 
 
 
@@ -75,22 +84,25 @@ const lantern: LanternConstructor = Object.assign((temp_lantern_ref = async func
             (FOUND && _pkg["@lantern"]) || {},
             config_options
         ),
+
         {
             type = "http"
         } = options,
+
         tool_set: typeof LanternToolsBase = {
             http: HTTPSToolSet,
             http2: HTTPS2ToolSet,
             https: HTTPSToolSet,
             http2s: HTTPS2ToolSet
         }[type],
-        responseFunction = async (toolset: ToolSet, request_data: RequestData, DispatchMap, DispatchDefaultMap) => {
+
+        responseFunction = async (tool_set: ToolSet, request_data: RequestData, log_queue: LogQueue, DispatchMap, DispatchDefaultMap) => {
             try {
-                if (!(await dispatcher(toolset, request_data, DispatchMap, ext_map)))
-                    dispatcher.default(404, toolset, request_data, DispatchDefaultMap, ext_map);
+                if (!(await dispatcher(tool_set, request_data, log_queue, DispatchMap, ext_map)))
+                    dispatcher.default(404, tool_set, request_data, log_queue, DispatchDefaultMap, ext_map);
             } catch (e) {
-                log.error(e);
-                dispatcher.default(404, toolset, request_data, DispatchDefaultMap, ext_map);
+                log_queue.createLocalLog("Error").sub_error(e).delete();
+                dispatcher.default(404, tool_set, request_data, log_queue, DispatchDefaultMap, ext_map);
             }
         };
 

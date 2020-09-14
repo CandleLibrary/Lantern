@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
-import { Dispatcher } from "../types";
-import ext_map from "../extension_map.js";
+import { Dispatcher } from "../types/types";
+import ext_map from "../extension/extension_map.js";
 import { getPackageJsonObject } from "@candlefw/wax";
 import URL from "@candlefw/url";
 
