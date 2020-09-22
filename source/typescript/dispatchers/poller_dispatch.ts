@@ -43,9 +43,9 @@ To use, add to the HTML head tag:
     <script type="module" src="/lantern-poll/?{dirs}"></script>
 
 where {dirs} is a list of domain directories separated by a semicolon [;]`,
-    keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/" },
-    SILENT: 0,
-    MIME: " application/ecmascript",
+    keys: { ext: 0xFFFFFFFF, dir: "/lantern-poll/*" },
+    SILENT: 1000,
+    MIME: " application/javascript",
     respond: async (tools) => {
         const url = tools.url;
         const ID = url.query;
@@ -59,9 +59,10 @@ where {dirs} is a list of domain directories separated by a semicolon [;]`,
 
         if (tools.filename == "poll") {
 
-            const data = await tools.getJSONasObject();
-            const ID = data.id;
-            const result = pollerCache.get(ID);
+            const
+                data = await tools.getJSONasObject(),
+                ID = data.id,
+                result = pollerCache.get(ID);
 
             watchPath(ID, tools);
 
@@ -69,14 +70,14 @@ where {dirs} is a list of domain directories separated by a semicolon [;]`,
 
             tools.setMIMEBasedOnExt("json");
 
-            return tools.sendUTF8FromFile(`{"UPDATED":${result}}`);
+            return tools.sendUTF8String(`{"UPDATED":${result}}`);
         } else {
 
             const rate = 100;
 
             tools.setMIME();
 
-            return tools.sendUTF8FromFile(`
+            return tools.sendUTF8String(`
                 import URL from "/cfw/url";
                     const url = new URL("/lantern-poll/poll");
                     const base_url = new URL();
