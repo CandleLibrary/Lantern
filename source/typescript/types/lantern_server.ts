@@ -7,4 +7,6 @@ export interface LanternServer<server_type> {
     server: server_type;
     ext: any;
     close: () => void;
+
+    isOPEN: () => boolean;
 }
