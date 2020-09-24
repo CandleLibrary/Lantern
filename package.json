@@ -1,6 +1,6 @@
 {
   "name": "@candlefw/lantern",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "Extensible Web Server",
   "main": "./build/library/lantern.js",
   "types": "./build/types/lantern.d.ts",
@@ -27,16 +27,16 @@
   },
   "homepage": "https://github.com/candlefw/lantern#readme",
   "dependencies": {
-    "@candlefw/url": "*",
     "@candlefw/cfw": "*",
-    "@candlefw/spark": "*",
     "@candlefw/conflagrate": "*",
-    "@candlefw/js": "*",
     "@candlefw/css": "*",
     "@candlefw/glow": "*",
     "@candlefw/hydrocarbon": "*",
-    "@candlefw/wind": "*",
+    "@candlefw/js": "*",
+    "@candlefw/spark": "*",
+    "@candlefw/url": "*",
     "@candlefw/wick": "*",
+    "@candlefw/wind": "*",
     "node-watch": "^0.6.3"
   },
   "devDependencies": {
