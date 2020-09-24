@@ -39,11 +39,13 @@ export class Logger {
         this.messages = [];
         this.delete_fn = delete_fn;
     }
-    delete() {
-        if (this.messages.length > 0)
-            this.logger("\n", this.identifier, this.messages
-                .map((str, i) => i > 0 ? "\t" + str : str)
-                .join("\n"));
+    delete(SILENT = false) {
+
+        if (!SILENT)
+            if (this.messages.length > 0)
+                this.logger("\n", this.identifier, this.messages
+                    .map((str, i) => i > 0 ? "\t" + str : str)
+                    .join("\n"));
 
         this.messages.length = 0;
 

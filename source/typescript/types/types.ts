@@ -72,12 +72,33 @@ export interface ToolSet {
      * an error reading the file.
      */
     sendRawStreamFromFile(file_path: string): Promise<boolean>;
-
+    /**
+     * Name of the file component of the filepath without extension
+     */
     readonly filename: string;
+
+    /**
+     * Name of the file component of the filepath with extension
+     */
     readonly file: string;
+
+    /**
+     * Filepath component of the requested url
+     */
     readonly pathname: string;
+
+    /**
+     * Name of the extension component of the filepath if present
+     */
     readonly ext: string;
+
+    /**
+     * Filepath component of without any file, if present
+     */
     readonly dir: string;
+    /**
+     * The full request URL.
+     */
     readonly url: URL;
 
     redirect(new_url: string | URL): boolean;

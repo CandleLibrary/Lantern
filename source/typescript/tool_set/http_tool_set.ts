@@ -203,7 +203,7 @@ export class HTTPSToolSet extends LanternToolsBase {
                 resolve(true);
             });
             stream.on("error", e => {
-                this._log.error((e));
+                this._log.sub_error((e));
                 stream.close();
                 resolve(false);
             });
