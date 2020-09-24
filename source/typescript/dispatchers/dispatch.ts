@@ -5,7 +5,7 @@ import default_dispatch from "./default_dispatch.js";
 import { Dispatcher, ToolSet } from "../types/types.js";
 import { RequestData } from "../types/request_data";
 import LanternToolsBase from "../tool_set/tools.js";
-import { LogQueue } from "../utils/log.js";
+import { LogQueue, Logger } from "../utils/log.js";
 
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
@@ -13,20 +13,30 @@ const e0x102 = "Dispatch object must contain a set of dispatch keys. Error missi
 const e0x103 = "Dispatch object must have name. Error missing dispatch_object.name.";
 const e0x104 = "Dispatch object name must be a string. Error dispatch_object.name is not a string value.";
 
-async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, request_data: RequestData, log) {
+async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, request_data: RequestData, log: Logger) {
 
-    for (let i = 0; i < d_objs.length; i++) {
+    let SUCCESS = false, SILENT = false;
+
+    for (let i = 0; i < d_objs.length && !SUCCESS; i++) {
+        SILENT = false;
+
         let do_ = d_objs[i];
+
+        SILENT = typeof (do_.SILENT) == "number"
+            ? do_.SILENT++ > 100
+                ? (log.sub_message(`Dispatch [${do_.name}] kept silent for 100 requests`), do_.SILENT = 0, false)
+                : true
+            : false;
 
         //@ts-ignore
         const tool_box = tool_set.createToolbox(do_, request_data, log);
 
+
         switch (do_.response_type) {
 
             case 0:
-                const SUCCESS = await tool_box.respond();
+                SUCCESS = await tool_box.respond();
                 tool_box.destroy();
-                if (SUCCESS) return SUCCESS;
                 break;
 
             case 1:
@@ -34,11 +44,17 @@ async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, re
                 tool_box.setMIME(do_.MIME);
                 await tool_box.sendUTF8String();
                 tool_box.destroy();
-                return true;
+                SUCCESS = true;
+                break;
         }
     }
 
-    return false;
+    SILENT = SILENT && SUCCESS;
+
+    return {
+        SUCCESS,
+        SILENT
+    };
 }
 
 export function getDispatches(request_data: RequestData, DispatchMap, ext_map):
@@ -84,16 +100,15 @@ export default async function dispatcher<T>(tool_set, request_data: RequestData,
 
     local_log.message(`Responding with dispatchers [${
         dispatch_objects
-            .filter(dsp => typeof (dsp.SILENT) == "number" ? dsp.SILENT++ > 100 ? (dsp.SILENT = 0, true) : false : true)
             .map((dsp, i) => `${i + 1}: ${dsp.name}`)
             .join(", ")
         }]`);
 
-    const result = await respond(dispatch_objects, tool_set, request_data, local_log);
+    const { SILENT, SUCCESS } = await respond(dispatch_objects, tool_set, request_data, local_log);
 
-    local_log.delete();
+    local_log.delete(SILENT);
 
-    return result;
+    return SUCCESS;
 }
 
 
