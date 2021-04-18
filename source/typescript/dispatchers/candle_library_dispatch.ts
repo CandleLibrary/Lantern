@@ -35,20 +35,25 @@ async function Set() {
 }
 
 export default <Dispatcher>{
-    name: "CFW Builtins DEV",
-    description: `Serves CandleFW libraries from the virtual directory [cfw]
+    name: "CandleLib Development Built-ins",
+
+    description: `Serves Candle libraries from the virtual directories [@cl] or [@candlelib]
     
     Available libraries:
+
         Library :   src name
         ______________________
-        WICK    :   /cfw/wick
-                    /cfw/wicklite
-        GLOW    :   /cfw/glow
-        URL     :   /cfw/url
-        HTML    :   /cfw/html
-        CSS     :   /cfw/css
-        JS      :   /cfw/js
-                    /cfw/ecma`,
+
+        WICK    :   /@cl/wick
+                    /@cl/wickrt
+        GLOW    :   /@cl/glow
+        URL     :   /@cl/url
+        HTML    :   /@cl/html
+        CSS     :   /@cl/css
+        TS      :   /@cl/ts
+        JS      :   /@cl/js
+                    /@cl/ecma
+`,
     respond: async (tools) => {
         await Set();
 
@@ -60,12 +65,18 @@ export default <Dispatcher>{
         if (dir_sections[1] == "cfw")
             dir_sections.splice(0, 1);
 
+        if (dir_sections[1] == "@cl")
+            dir_sections.splice(0, 1);
+
         if (dir_sections[1] == "@candlefw")
+            dir_sections.splice(1, 1);
+
+        if (dir_sections[1] == "@candlelib")
             dir_sections.splice(1, 1);
 
         const pkg = dir_sections[1],
             source_name = {
-                "wickrt": "wick",
+                "wick.rt": "wick",
                 "wick": "wick",
                 "url": "url",
                 "glow": "glow",
@@ -95,10 +106,12 @@ export default <Dispatcher>{
                 ? path.join(CFW_DIR, pkg, "build/library", file_path || (source_name + ".js"))
                 : "");
 
+
         if (return_path !== "") {
+            tools.log(file_path, return_path);
             const str = await tools.getUTF8FromFile(return_path);
             tools.setMIMEBasedOnExt(ext || "js");
-            return tools.sendUTF8String(str.replace(/\"\@candlefw\/([^\/\"]+)/g, "\"/cfw\/$1/"));
+            return tools.sendUTF8String(str.replace(/\"\@candle(fw|lib)\/([^\/\"]+)\/?/g, "\"/cfw\/$2/"));
         }
 
         return false;

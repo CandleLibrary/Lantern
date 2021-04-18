@@ -154,7 +154,7 @@ export class HTTPSToolSet extends LanternToolsBase {
             this.sendHeaders();
             this.res.write(str, "utf8");
             this.res.end();
-            this._log.sub_message(`Responding with utf8 encoded data from file ${loc}`);
+            this.log(`Responding with utf8 encoded data from file ${loc}`);
             return true;
         }
         catch (e) {
@@ -165,11 +165,14 @@ export class HTTPSToolSet extends LanternToolsBase {
 
 
     async sendUTF8String(str: string = <string>this.do.respond): Promise<boolean> {
+
+        if (str === null || str === undefined) return false;
+
         try {
             this.sendHeaders();
             this.res.write(str, "utf8");
             this.res.end();
-            this._log.sub_message(`Responding with utf8 string`);
+            this.log(`Responding with utf8 string`);
         }
         catch (e) {
             this._log.sub_error(e);
@@ -179,11 +182,26 @@ export class HTTPSToolSet extends LanternToolsBase {
         return true;
     };
 
+    async sendRawStream(buffer: (Buffer | ArrayBuffer) = <Buffer | ArrayBuffer><any>this.do.respond): Promise<boolean> {
+
+        if (buffer == null || buffer.byteLength == 0) return false;
+
+        this.log(`Responding with ${buffer.byteLength} bytes of binary data `);
+
+        this.sendHeaders();
+
+        this.res.write(buffer);
+
+        this.res.end();
+
+        return true;
+    };
+
 
     async sendRawStreamFromFile(file_path: string): Promise<boolean> {
         const loc = path.isAbsolute(file_path) ? file_path : path.join(CWD, file_path);
 
-        this._log.sub_message(`Responding with raw data stream from file ${loc} by dispatcher [${this.do.name}]`);
+        this.log(`Responding with raw data stream from file ${loc} by dispatcher [${this.do.name}]`);
 
         //open file stream
         const stream = fs.createReadStream(loc);
@@ -217,7 +235,7 @@ export class HTTPSToolSet extends LanternToolsBase {
     redirect(new_url: string) {
 
         if (new_url + "" == this._url + "") {
-            this._log.sub_error(`No difference between redirected URL ${new_url} and original request URL.`);
+            this.error(`No difference between redirected URL ${new_url} and original request URL.`);
             return false;
         }
 

@@ -5,7 +5,7 @@ import http2 from "http2";
 
 import mock_certificate from "./data/mock_certificate.js";
 import $404_dispatch from "./dispatchers/404_dispatch.js";
-import candlefw_dispatch from "./dispatchers/candlefw_dispatch.js";
+import candlefw_dispatch from "./dispatchers/candle_library_dispatch.js";
 import dispatcher from "./dispatchers/dispatch.js";
 import poller_dispatch from "./dispatchers/poller_dispatch.js";
 import ext_map from "./extension/extension_map.js";
@@ -23,17 +23,12 @@ import { getUnusedPort } from "./utils/get_unused_port.js";
 import { LanternLoggingOutput, setLogger, LogQueue } from "./utils/log.js";
 
 
-
-
-
-
-
 export {
     poller_dispatch,
     candlefw_dispatch,
     $404_dispatch
 };
-export { Dispatcher, DispatchKey };
+export { Dispatcher, DispatchKey, LanternServer };
 
 /**
  * Lantern Server Constructor

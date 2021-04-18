@@ -29,7 +29,7 @@ async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, re
             : false;
 
         //@ts-ignore
-        const tool_box = tool_set.createToolbox(do_, request_data, log);
+        const tool_box: LanternToolsBase = tool_set.createToolbox(do_, request_data, log);
 
 
         switch (do_.response_type) {
@@ -42,9 +42,23 @@ async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, re
             case 1:
                 tool_box.setStatusCode();
                 tool_box.setMIME(do_.MIME);
-                await tool_box.sendUTF8String();
+
+                if (await tool_box.sendUTF8String()) {
+                    SUCCESS = true;
+                };
+
                 tool_box.destroy();
-                SUCCESS = true;
+                break;
+
+            case 2:
+                tool_box.setStatusCode();
+                tool_box.setMIME(do_.MIME);
+
+                if (await tool_box.sendRawStream()) {
+                    SUCCESS = true;
+                };
+
+                tool_box.destroy();
                 break;
         }
     }
@@ -98,10 +112,9 @@ export default async function dispatcher<T>(tool_set, request_data: RequestData,
         //Used to keep all relevant messages in one block of text when logging.
         local_log = log_queue.createLocalLog(`Log of request for ${url}:`);
 
-    local_log.message(`Responding with dispatchers [${
-        dispatch_objects
-            .map((dsp, i) => `${i + 1}: ${dsp.name}`)
-            .join(", ")
+    local_log.message(`Responding with dispatchers [${dispatch_objects
+        .map((dsp, i) => `${i + 1}: ${dsp.name}`)
+        .join(", ")
         }]`);
 
     const { SILENT, SUCCESS } = await respond(dispatch_objects, tool_set, request_data, local_log);
@@ -188,7 +201,9 @@ function AddCustomDispatch(log_queue: LogQueue, dispatch_object, DispatchMap, De
 
         if (t_o_r == "string") {
             dispatch_object.response_type = 1;
-        } else
+        } else if (t_o_r == "object")
+            dispatch_object.response_type = 2;
+        else
             return log.sub_error(`[${Name}] ${e0x101}`).delete();
     }
 

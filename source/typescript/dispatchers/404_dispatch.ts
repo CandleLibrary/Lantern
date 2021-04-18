@@ -1,7 +1,7 @@
 import { Dispatcher } from "../types/types";
 
 /**
-	Credit: https://github.com/h5bp/html5-boilerplate
+    Credit: https://github.com/h5bp/html5-boilerplate
 **/
 
 const $404 = `
@@ -63,6 +63,12 @@ const $404 = `
 
 export default <Dispatcher>{
     name: "404",
+    description: `
+A default 404 page. 
+
+Design credit to: H5BP
+https://github.com/h5bp/html5-boilerplate
+    `,
     response_code: 404,
     MIME: "text/html",
     respond: $404,

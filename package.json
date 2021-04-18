@@ -1,45 +1,45 @@
 {
-  "name": "@candlefw/lantern",
-  "version": "0.0.19",
-  "description": "Extensible Web Server",
-  "main": "./build/library/lantern.js",
-  "types": "./build/types/lantern.d.ts",
-  "type": "module",
-  "bin": {
-    "lantern": "cli.js"
-  },
-  "scripts": {
-    "prepublishOnly": "tsc -p ./tsconfig.json && yarn test",
-    "test": "cfw.test  --headless ./test/**",
-    "test.watch": "cfw.test -w ./test/**"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/candlefw/lantern.git"
-  },
-  "keywords": [
-    "CFW"
-  ],
-  "author": "Anthony Weathersby",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/candlefw/lantern/issues"
-  },
-  "homepage": "https://github.com/candlefw/lantern#readme",
-  "dependencies": {
-    "@candlefw/cfw": "*",
-    "@candlefw/conflagrate": "*",
-    "@candlefw/css": "*",
-    "@candlefw/glow": "*",
-    "@candlefw/hydrocarbon": "*",
-    "@candlefw/js": "*",
-    "@candlefw/spark": "*",
-    "@candlefw/url": "*",
-    "@candlefw/wick": "*",
-    "@candlefw/wind": "*",
-    "node-watch": "^0.6.3"
-  },
-  "devDependencies": {
-    "@candlefw/test": "*"
-  }
+    "name": "@candlelib/lantern",
+    "version": "0.1.0",
+    "description": "Extensible Web Server",
+    "main": "./build/library/lantern.js",
+    "types": "./build/types/lantern.d.ts",
+    "type": "module",
+    "bin": {
+        "lantern": "cli.js"
+    },
+    "scripts": {
+        "prepublishOnly": "tsc -p ./tsconfig.json && yarn test",
+        "test": "cfw.test  --headless ./test/**",
+        "test.watch": "cfw.test -w ./test/**"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/candlefw/lantern.git"
+    },
+    "keywords": [
+        "CFW"
+    ],
+    "author": "Anthony Weathersby",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/candlefw/lantern/issues"
+    },
+    "homepage": "https://github.com/candlefw/lantern#readme",
+    "dependencies": {
+        "@candlefw/cfw": "0.0.1",
+        "@candlefw/conflagrate": "0.1.1",
+        "@candlefw/css": "0.2.8",
+        "@candlefw/glow": "0.3.0",
+        "@candlefw/hydrocarbon": "0.8.0-alpha-2",
+        "@candlefw/js": "0.4.0",
+        "@candlefw/spark": "0.1.2",
+        "@candlefw/url": "0.1.5",
+        "@candlefw/wick": "0.13.3",
+        "@candlefw/wind": "0.4.3",
+        "node-watch": "^0.6.3"
+    },
+    "devDependencies": {
+        "@candlelib/cure": "0.5.0"
+    }
 }

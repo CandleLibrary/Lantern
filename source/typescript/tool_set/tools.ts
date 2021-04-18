@@ -121,13 +121,28 @@ export default abstract class LanternToolsBase implements ToolSet {
             else
                 return null;
         } catch (e) {
-            this._log.error(e);
+            this.error(e);
             return {};
         }
     }
 
     log(...v) {
-        this._log.sub_message(...v);
+        this._log.sub_message(`[${this.do.name || "null"}]`, ...v);
+    }
+
+    error(error_message: any, e: Error = null) {
+        if (e)
+            this._log.sub_error(this.do.name + ":", error_message, e.stack);
+        else
+            this._log.sub_error(this.do.name + ":", error_message);
+        return false;
+    }
+    /**
+     * The root directory from which Lantern can access and 
+     * serve files. 
+     */
+    get cwd() {
+        return CWD;
     }
 
     get filename(): string {
@@ -170,9 +185,9 @@ export default abstract class LanternToolsBase implements ToolSet {
             if (typeof this.do.respond == "string") {
                 return await this.sendUTF8String(this.do.respond);
             } else
-                DISPATCH_SUCCESSFUL = await this.do.respond(this);
+                DISPATCH_SUCCESSFUL = await (<any>this.do.respond)(this);
         } catch (e) {
-            this._log.sub_error(`${this.do.name}: Response with dispatcher [${this.do.name}] failed: \n${e.stack}`);
+            this.error(`Response with dispatcher [${this.do.name}] failed`, e);
         }
 
         return DISPATCH_SUCCESSFUL;
@@ -190,11 +205,6 @@ export default abstract class LanternToolsBase implements ToolSet {
         }
 
         this.pending_headers.push(["content-type", MIME]);
-    }
-
-    error(error: any) {
-        this._log.sub_error(this.do.name + ":", error);
-        return false;
     }
 
     /**
@@ -216,18 +226,20 @@ export default abstract class LanternToolsBase implements ToolSet {
         try {
             return await fsp.readFile(path.resolve(CWD, file_path), "utf8");
         } catch (e) {
-            this._log.error(e);
+            this.error("Could not load file:" + file_path, e);
             return "";
         }
     };
 
     abstract getHeader(header_name: string): string;
 
-    abstract async sendUTF8FromFile(file_path: string): Promise<boolean>;
+    abstract sendUTF8FromFile(file_path: string): Promise<boolean>;
 
-    abstract async sendUTF8String(str?: string): Promise<boolean>;
+    abstract sendUTF8String(str?: string): Promise<boolean>;
 
-    abstract async sendRawStreamFromFile(file_path: string): Promise<boolean>;
+    abstract sendRawStreamFromFile(file_path: string): Promise<boolean>;
+
+    abstract sendRawStream(buffer?: ArrayBuffer | Buffer): Promise<boolean>;
 
     abstract redirect(new_url: string): boolean;
 
@@ -235,7 +247,7 @@ export default abstract class LanternToolsBase implements ToolSet {
         "POST" | "PUT" | "GET" | "SET" | "DELETE" |
         "HEAD" | "OPTIONS" | "TRACE" | "PATCH" | "CONNECT";
 
-    abstract async readData(): Promise<string>;
+    abstract readData(): Promise<string>;
 
     abstract getCookie(name: string): string;
 

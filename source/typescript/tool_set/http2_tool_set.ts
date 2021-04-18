@@ -147,7 +147,7 @@ export class HTTPS2ToolSet extends LanternToolsBase {
             this.sendHeaders();
             this.str.write(str, "utf8");
             this.str.end();
-            this._log.sub_message(`${this.do.name}: Responding with utf8 encoded data from file ${loc}`);
+            this.log(`Responding with utf8 encoded data from file ${loc}`);
             return true;
         }
         catch (e) {
@@ -162,7 +162,7 @@ export class HTTPS2ToolSet extends LanternToolsBase {
             this.sendHeaders();
             this.str.write(str, "utf8");
             this.str.end();
-            this._log.sub_message(`${this.do.name}: Responding with utf8 string`);
+            this.log(`Responding with utf8 string`);
             return true;
         }
         catch (e) {
@@ -192,7 +192,7 @@ export class HTTPS2ToolSet extends LanternToolsBase {
                 this.str.end();
                 stream.close();
                 resolve(true);
-                this._log.sub_message(`${this.do.name}: Responding with raw data stream from file ${loc} by dispatcher [${this.do.name}]`);
+                this.log(`Responding with raw data stream from file ${loc} by dispatcher [${this.do.name}]`);
             });
             stream.on("error", e => {
                 this._log.sub_error(this.do.name + ":", e);

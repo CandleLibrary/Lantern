@@ -32,11 +32,12 @@ ext_map.all = 0xFFFFFFFF;
 
 let key_offset = extension_array.length;
 
-export function addKey(key, ext_map, log: LogQueue) {
+export function addKey(key, ext_map, log: LogQueue = null) {
 
 	if (!ext_map[key] && key_offset < 31) {
 		ext_map[key] = 1 << key_offset++;
-		log.createLocalLog("Extension").message(`Added new extension ${key} with value ${ext_map[key]}`).delete();
+		if (log)
+			log.createLocalLog("Extension").message(`Added new extension ${key} with value ${ext_map[key]}`).delete();
 	}
 
 	return ext_map[key] || 0xFFFFFFFF;

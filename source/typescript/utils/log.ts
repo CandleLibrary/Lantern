@@ -25,7 +25,10 @@ export class Logger {
     str_poly;
 
     identifier: string;
+
     messages: Array<string>;
+
+    dispatcher_name: string;
 
     next: Logger;
 
@@ -43,7 +46,7 @@ export class Logger {
 
         if (!SILENT)
             if (this.messages.length > 0)
-                this.logger("\n", this.identifier, this.messages
+                this.logger("\n", `${this.identifier}:`, this.messages
                     .map((str, i) => i > 0 ? "\t" + str : str)
                     .join("\n"));
 

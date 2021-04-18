@@ -101,10 +101,16 @@ export interface ToolSet {
      */
     readonly url: URL;
 
+    /**
+     * The root directory from which Lantern can access and 
+     * serve files. 
+     */
+    readonly cwd: string;
+
     redirect(new_url: string | URL): boolean;
     error(error): void;
 
-    log(message: string): void;
+    log(...message: string[]): void;
 }
 
 export interface DispatchKey {
@@ -177,7 +183,7 @@ export interface Dispatcher {
      * response code `200` (if Dispatcher.response_code is not set) and
      * MIME type `text/plain` (if Dispatcher.MIME is not set)
      */
-    respond: ((tools: ToolSet) => Promise<boolean>) | string;
+    respond: ((tools: ToolSet) => Promise<boolean>) | string | ArrayBuffer | Buffer;
 }
 
 
