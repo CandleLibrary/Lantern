@@ -232,7 +232,7 @@ function AddCustomDispatch(log_queue: LogQueue, dispatch_object, DispatchMap, De
 
     const width = process.stdout.columns - 1;
 
-    log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}`);
+    log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}\n`);
 
     if (typeof (dispatch_object.MIME) !== "string")
         dispatch_object.MIME = "text/plain";
