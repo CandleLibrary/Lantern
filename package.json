@@ -30,13 +30,13 @@
         "@candlefw/cfw": "0.0.1",
         "@candlefw/conflagrate": "0.1.1",
         "@candlefw/css": "0.2.8",
-        "@candlefw/glow": "0.3.0",
-        "@candlefw/hydrocarbon": "0.8.0-alpha-2",
+        "@candlefw/glow": "0.3.2",
+        "@candlefw/hydrocarbon": "0.8.1-alpha-2",
         "@candlefw/js": "0.4.0",
-        "@candlefw/spark": "0.1.2",
+        "@candlefw/spark": "0.2.0",
         "@candlefw/url": "0.1.5",
-        "@candlefw/wick": "0.13.3",
-        "@candlefw/wind": "0.4.3",
+        "@candlefw/wick": "0.12.6",
+        "@candlefw/wind": "0.4.4",
         "node-watch": "^0.6.3"
     },
     "devDependencies": {
