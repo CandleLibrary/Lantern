@@ -22,9 +22,7 @@ export default <Dispatcher>{
 
         tools.setMIMEBasedOnExt();
 
-        console.log(tools.dir, tools.file);
-
-        return tools.sendRawStreamFromFile("./" + tools.file);
+        return tools.sendRawStreamFromFile(path.join(tools.cwd, tools.dir, tools.file));
     },
     keys: { ext: ext_map.all, dir: "/*" }
 };

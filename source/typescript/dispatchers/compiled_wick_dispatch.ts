@@ -61,20 +61,8 @@ const FILE = {
 
 const
     addHeader = (file, header_data) => Object.assign({}, file, { header: file.header + "\n" + header_data }),
-    addBody = (file, body_data) => Object.assign({}, file, { body_html: file.body_html + "\n" + body_data }),
-    addTemplate = (file, template_data) => Object.assign({}, file, { templates: file.templates + "\n" + template_data }),
     addScript = (file, script_data) => Object.assign({}, file, { scripts: file.scripts + "\n" + script_data }),
-    createComponentScript = (file, components, fn, after = "") => {
-        const str = components.map(fn).join("\n\t") + "\n" + after;
-        return addScript(file, `
-<script id="wick-components" async type="module">
-    import "/@cl/wick.rt/";
-    const w = @cl.wick; 
-    w.setPresets({});
-    ${str}
-</script>`);
-    },
-    createModuleComponentScript = (file, components, fn, after = "") => {
+    createModuleComponentScript = (file, components, fn, presets = {}, after = "") => {
         const str = components.map(fn).join("\n\t") + "\n" + after;
         return addScript(file, `
 <script async type="module" id="wick-components">
@@ -82,7 +70,7 @@ const
     const w = cfw.wick; 
     window.addEventListener("load", async () => {
 
-    w.rt.setPresets({});
+    w.rt.setPresets(${JSON.stringify(presets)});
 
     ${str}})
 </script>`);
@@ -110,7 +98,7 @@ export const renderPage = async (
     let component: Component = null, presets = await wick.setPresets({
         options: {
             url: {
-                wickrt: "/@cl/wick/build/library/wick.runtime.js",
+                wickrt: "/@cl/wick/build/library/runtime.js",
                 glow: "/@cl/glow/"
             }
         }
@@ -135,7 +123,7 @@ export const renderPage = async (
             file = addScript(file, `<script>{const w = wick.default; cfw.radiate("${component.name}");}</script>`);
         }
 
-        const html = wick.utils.RenderPage(component).page;
+        const html = (await wick.utils.RenderPage(component)).page;
 
         return { html };
 
@@ -154,8 +142,7 @@ export const renderPage = async (
             const comp_class_string = wick.utils.componentToClassString(comp, presets, false, false);
 
             return (`await w( "${comp.location.toString().replace(process.cwd(), "")}");`);
-        }, `
-        `);
+        }, presets, ``);
     }
 
 
@@ -182,7 +169,7 @@ function getComponentGroup(
 ): Array<Component> {
 
 
-    if (comp && (comp.bindings.length > 0 || comp.local_component_names.size > 0)) {
+    if (comp && (comp.hooks.length > 0 || comp.local_component_names.size > 0)) {
 
         for (const name of comp.local_component_names.values()) {
 
@@ -241,7 +228,7 @@ export default <Dispatcher>{
 
             const { html } = await renderPage(url, wick, {
                 source_type: SourceType.COMBINED,
-                USE_FLAME_RUNTIME: !!(tools.url.getData().flaming || false),
+                USE_FLAME_RUNTIME: false,
                 source_url: tools.url
             });
 

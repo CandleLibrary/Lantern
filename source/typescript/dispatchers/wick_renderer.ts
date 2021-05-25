@@ -1,13 +1,10 @@
+import URL from "@candlefw/url";
 import {
     Component,
     Presets,
-    componentDataToClassString,
-    componentDataToCSS,
-    componentDataToHTML,
     WickLibrary
 } from "@candlefw/wick";
 
-import URL from "@candlefw/url";
 
 /**
  * Render provides the mechanism to turn wick components 
@@ -55,18 +52,7 @@ const FILE = {
 const
     addHeader = (file, header_data) => Object.assign({}, file, { header: file.header + "\n" + header_data }),
     addBody = (file, body_data) => Object.assign({}, file, { body_html: file.body_html + "\n" + body_data }),
-    addTemplate = (file, template_data) => Object.assign({}, file, { templates: file.templates + "\n" + template_data }),
     addScript = (file, script_data) => Object.assign({}, file, { scripts: file.scripts + "\n" + script_data }),
-    createComponentScript = (file, components, fn, after = "") => {
-        const str = components.map(fn).join("\n\t") + "\n" + after;
-        return addScript(file, `
-<script id="wick-components" async type="module">
-    import "/@candlefw/wick/";
-    const w = cfw.wick; 
-    w.setPresets({});
-    ${str}
-</script>`);
-    },
     createModuleComponentScript = (file, components, fn, after = "") => {
         const str = components.map(fn).join("\n\t") + "\n" + after;
         return addScript(file, `
@@ -132,7 +118,7 @@ export const renderPage = async (
     let component: Component = null, presets = await wick.setPresets({
         options: {
             url: {
-                wickrt: "/cfw/wick/build/library/wick.runtime.js",
+                wickrt: "/cfw/wick/build/library/runtime.js",
                 glow: "/cfw/glow/"
             }
         }
@@ -157,7 +143,7 @@ export const renderPage = async (
             file = addScript(file, `<script>{const w = wick.default; cfw.radiate("${component.name}");}</script>`);
         }
 
-        const html = wick.utils.RenderPage(component).page;
+        const html = (await wick.utils.RenderPage(component)).page;
 
         return { html };
 
