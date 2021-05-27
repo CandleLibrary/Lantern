@@ -68,7 +68,7 @@ export class HTTPS2ToolSet extends LanternToolsBase {
 
         server.listen(port, host, () => { });
 
-        
+
 
         log_queue.createLocalLog("General").message(`${server_name}: Using HTTPS/TLS secure protocol.`).delete();
 
@@ -95,6 +95,7 @@ export class HTTPS2ToolSet extends LanternToolsBase {
     destroy() {
         this.str = null;
         this.hdr = null;
+        this.data = null;
         super.destroy();
     }
 

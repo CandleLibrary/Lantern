@@ -102,6 +102,7 @@ export class HTTPSToolSet extends LanternToolsBase {
     destroy() {
         this.res = null;
         this.req = null;
+        this.data = null;
         super.destroy();
     }
 
