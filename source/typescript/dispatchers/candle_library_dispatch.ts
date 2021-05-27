@@ -2,8 +2,8 @@ import path from "path";
 import fs from "fs";
 import { Dispatcher } from "../types/types";
 import ext_map from "../extension/extension_map.js";
-import { getPackageJsonObject } from "@candlefw/wax";
-import URL from "@candlefw/url";
+import { getPackageJsonObject } from "@candlelib/wax";
+import URL from "@candlelib/url";
 
 const fsp = fs.promises;
 let READY = false;
@@ -23,7 +23,7 @@ async function Set() {
     let found = false;
 
     while (!found && candidate_dir.length > 1) {
-        CFW_DIR = path.join(candidate_dir.join("/"), "node_modules/@candlefw/");
+        CFW_DIR = path.join(candidate_dir.join("/"), "node_modules/@candlelib/");
         try {
             const data = await fsp.readdir(CFW_DIR);
             found = true;
@@ -52,7 +52,6 @@ export default <Dispatcher>{
         CSS     :   /@cl/css
         TS      :   /@cl/ts
         JS      :   /@cl/js
-                    /@cl/ecma
 `,
     respond: async (tools) => {
         await Set();
@@ -62,14 +61,8 @@ export default <Dispatcher>{
             dir = url.path,
             dir_sections = dir.split("/");
 
-        if (dir_sections[1] == "cfw")
-            dir_sections.splice(0, 1);
-
         if (dir_sections[1] == "@cl")
             dir_sections.splice(0, 1);
-
-        if (dir_sections[1] == "@candlefw")
-            dir_sections.splice(1, 1);
 
         if (dir_sections[1] == "@candlelib")
             dir_sections.splice(1, 1);
@@ -82,7 +75,7 @@ export default <Dispatcher>{
                 "glow": "glow",
                 "html": "html",
                 "css": "css",
-                "cfw": "cfw",
+                "candle": "cfw",
                 "hydrocarbon": "hydrocarbon",
                 "conflagrate": "conflagrate",
                 "wind": "wind",
@@ -96,7 +89,7 @@ export default <Dispatcher>{
                 "glow",
                 "html",
                 "css",
-                "cfw",
+                "candle",
                 "hydrocarbon",
                 "conflagrate",
                 "wind",
@@ -111,10 +104,10 @@ export default <Dispatcher>{
             tools.log(file_path, return_path);
             const str = await tools.getUTF8FromFile(return_path);
             tools.setMIMEBasedOnExt(ext || "js");
-            return tools.sendUTF8String(str.replace(/\"\@candle(fw|lib)\/([^\/\"]+)\/?/g, "\"/cfw\/$2/"));
+            return tools.sendUTF8String(str.replace(/\"\@candlelib\/([^\/\"]+)\/?/g, "\"/@cl\/$1/"));
         }
 
         return false;
     },
-    keys: [{ ext: ext_map.all, dir: "/*" }, { ext: ext_map.all, dir: "/cfw" }]
+    keys: [{ ext: ext_map.all, dir: "/*" }, { ext: ext_map.all, dir: "/@cl" }]
 };

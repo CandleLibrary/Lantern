@@ -1,4 +1,4 @@
-import URL from "@candlefw/url";
+import URL from "@candlelib/url";
 export interface LanternConstructorOptions {
     /**
      * The type of protocol to use with the server.

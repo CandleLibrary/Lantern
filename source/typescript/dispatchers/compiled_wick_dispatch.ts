@@ -10,9 +10,9 @@ import wick, {
     componentDataToCSS,
     componentDataToHTML,
     WickLibrary
-} from "@candlefw/wick";
+} from "@candlelib/wick";
 
-import URL from "@candlefw/url";
+import URL from "@candlelib/url";
 import ext_map from "../extension/extension_map.js";
 
 

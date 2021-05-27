@@ -5,9 +5,9 @@
  * ASCENDING based on the order in which the dispatchers
  * where submitted to AddDispatch
  */
-import { AddDispatch, getDispatches } from "@candlefw/lantern/build/library/dispatcher.js";
-import ext_map from "@candlefw/lantern/build/library/extension_map.js";
-import URL from "@candlefw/url";
+import { AddDispatch, getDispatches } from "@candlelib/lantern/build/library/dispatcher.js";
+import ext_map from "@candlelib/lantern/build/library/extension_map.js";
+import URL from "@candlelib/url";
 
 const
     DispatchMap = new Map(),

@@ -1,11 +1,11 @@
-import URL from "@candlefw/url";
-import { getPackageJsonObject } from "@candlefw/wax";
+import URL from "@candlelib/url";
+import { getPackageJsonObject } from "@candlelib/wax";
 
 import http2 from "http2";
 
 import mock_certificate from "./data/mock_certificate.js";
 import $404_dispatch from "./dispatchers/404_dispatch.js";
-import candlefw_dispatch from "./dispatchers/candle_library_dispatch.js";
+import candle_library_dispatch from "./dispatchers/candle_library_dispatch.js";
 import dispatcher from "./dispatchers/dispatch.js";
 import poller_dispatch from "./dispatchers/poller_dispatch.js";
 import ext_map from "./extension/extension_map.js";
@@ -25,7 +25,7 @@ import { LanternLoggingOutput, setLogger, LogQueue } from "./utils/log.js";
 
 export {
     poller_dispatch,
-    candlefw_dispatch,
+    candle_library_dispatch,
     $404_dispatch
 };
 export { Dispatcher, DispatchKey, LanternServer };

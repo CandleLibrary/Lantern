@@ -1,9 +1,9 @@
-import URL from "@candlefw/url";
+import URL from "@candlelib/url";
 import {
     Component,
     Presets,
     WickLibrary
-} from "@candlefw/wick";
+} from "@candlelib/wick";
 
 
 /**
@@ -58,7 +58,7 @@ const
         return addScript(file, `
 <script async type="module" id="wick-components">
     import flame from "/flame/editor/build/library/entry.js";
-    import "/@candlefw/wick/";
+    import "/@candlelib/wick/";
     const w = cfw.wick; 
     window.addEventListener("load", async () => {
    // w.rt.setPresets({});
@@ -105,7 +105,7 @@ export const renderPage = async (
     options: RenderOptions
 ): Promise<{ html?: string, js?: string, css?: string; }> => {
 
-    const wick_file = options?.sources?.wick ?? "/cfw/wick/";
+    const wick_file = options?.sources?.wick ?? "/@cl/wick/";
 
     await wick.server();
 
@@ -118,8 +118,8 @@ export const renderPage = async (
     let component: Component = null, presets = await wick.setPresets({
         options: {
             url: {
-                wickrt: "/cfw/wick/build/library/runtime.js",
-                glow: "/cfw/glow/"
+                wickrt: "/@cl/wick/build/library/runtime.js",
+                glow: "/@cl/glow/"
             }
         }
     });
@@ -150,8 +150,8 @@ export const renderPage = async (
     } else {
 
         file = addHeader(file, `<script type="module" src="${wick_file}"></script>`);
-        file = addHeader(file, `<script type="module" src="/cfw/css/"></script>`);
-        file = addHeader(file, `<script type="module" async src="/cfw/glow/"></script>`);
+        file = addHeader(file, `<script type="module" src="/@cl/css/"></script>`);
+        file = addHeader(file, `<script type="module" async src="/@cl/glow/"></script>`);
 
         file = addHeader(file, `<script src="/cm/codemirror.js"></script>`);
         file = addHeader(file, `<link href="/cm/codemirror.css" rel="stylesheet"/>`);

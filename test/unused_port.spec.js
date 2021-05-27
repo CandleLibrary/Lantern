@@ -4,8 +4,8 @@
  * port for the server.
  */
 
-import lantern from "@candlefw/lantern";
-import spark from "@candlefw/spark";
+import lantern from "@candlelib/lantern";
+import spark from "@candlelib/spark";
 
 
 const port1 = await lantern.getUnusedPort();

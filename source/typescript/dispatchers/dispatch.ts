@@ -1,4 +1,4 @@
-import URL from "@candlefw/url";
+import URL from "@candlelib/url";
 
 import http2 from "http2";
 import default_dispatch from "./default_dispatch.js";

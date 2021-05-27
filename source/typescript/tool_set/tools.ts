@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import ExtToMIME from "../extension/ext_to_mime.js";
-import URL from "@candlefw/url";
+import URL from "@candlelib/url";
 import { ToolSet, Dispatcher } from "../types/types";
 import { RequestData } from "../types/request_data";
 import { LanternServer } from "../types/lantern_server";

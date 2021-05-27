@@ -5,20 +5,20 @@
  * a browser.
  */
 
-import url from "@candlefw/url";
+import url from "@candlelib/url";
 assert_group("URL Global Should Match Window Location", () => {
     assert(url !== undefined, browser);
     assert(url.GLOBAL + "" == window.location, browser);
 });
 
-import wind from "@candlefw/wind";
+import wind from "@candlelib/wind";
 assert_group("Wind should parse window.location string and tokenize [https]", sequence, () => {
     const lex = wind(window.location + "");
     assert(lex.tx == "https", browser);
     assert(lex.ty == lex.types.id, browser);
 });
 
-import wick from "@candlefw/wick";
+import wick from "@candlelib/wick";
 assert_group("Wick Component", () => {
     const comp_data = await wick("<div>hello world</div>");
     const comp = new comp_data.class();
@@ -26,7 +26,7 @@ assert_group("Wick Component", () => {
     assert(document.body.children[1].innerHTML == "hello world", browser);
 });
 
-import glow from "@candlefw/glow";
+import glow from "@candlelib/glow";
 assert_group("Glow Animation", () => {
     const seq = glow.createSequence({
         obj: document.body,
