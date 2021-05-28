@@ -69,18 +69,18 @@ export default <Dispatcher>{
 
         const pkg = dir_sections[1],
             source_name = {
-                "wick.rt": "wick",
-                "wick": "wick",
-                "url": "url",
-                "glow": "glow",
-                "html": "html",
-                "css": "css",
-                "candle": "cfw",
-                "hydrocarbon": "hydrocarbon",
-                "conflagrate": "conflagrate",
-                "wind": "wind",
-                "spark": "spark",
-                "js": "javascript",
+                "wick-rt": "wick/entry-point/wick-runtime",
+                "wick": "wick/entry-point/wick-full",
+                "url": "url/url",
+                "glow": "glow/glow",
+                "html": "html/html",
+                "css": "css/css",
+                "candle": "candle/cfw",
+                "hydrocarbon": "hydrocarbon/hydrocarbon",
+                "conflagrate": "conflagrate/conflagrate",
+                "wind": "wind/wind",
+                "spark": "spark/spark",
+                "js": "js/javascript",
             }[pkg],
             file_path = dir_sections.slice(2).join("/").replace("build/library/", ""),
             return_path = ([
@@ -98,13 +98,33 @@ export default <Dispatcher>{
             ].includes(pkg)
                 ? path.join(CFW_DIR, pkg, "build/library", file_path || (source_name + ".js"))
                 : "");
+        if ((!file_path || file_path == "/") && source_name) {
+            return tools.redirect(`/@cl/${source_name}.js`);
+        }
+
 
 
         if (return_path !== "") {
             tools.log(file_path, return_path);
             const str = await tools.getUTF8FromFile(return_path);
             tools.setMIMEBasedOnExt(ext || "js");
-            return tools.sendUTF8String(str.replace(/\"\@candlelib\/([^\/\"]+)\/?/g, "\"/@cl\/$1/"));
+            return tools.sendUTF8String(
+                str
+                    .replace(/\"\@candlelib\/([^\/\"]+)\/?/g, "\"/@cl\/$1/")
+                    .replace(/^\s*import(.+)from\s*("|')([^"']+)("|')\;/g, (m, import_clause, _, path_str, __) => {
+                        // Convert all relative filepaths to absolute paths 
+                        // This helps ensure consistent model import behavior
+                        // and prevents duplicate requests that only differ
+                        // in the relative path base location
+                        let dest = new URL(path_str);
+
+                        if (dest.IS_RELATIVE) {
+                            dest = URL.resolveRelative(dest, tools.url);
+                        }
+
+                        return `\nimport ${import_clause} from \"${dest.path}\"`;
+                    })
+            );
         }
 
         return false;
