@@ -1,5 +1,5 @@
 import URL from "@candlelib/url";
-import { getPackageJsonObject } from "@candlelib/wax";
+import { getPackageJsonObject } from "@candlelib/paraffin";
 
 import http2 from "http2";
 

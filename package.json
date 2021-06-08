@@ -10,12 +10,12 @@
     },
     "scripts": {
         "prepublishOnly": "tsc -p ./tsconfig.json && yarn test",
-        "test": "cfw.test  --headless ./test/**",
-        "test.watch": "cfw.test -w ./test/**"
+        "test": "candle.cure  --headless ./test/**",
+        "test.watch": "candle.cure -w ./test/**"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/candlefw/lantern.git"
+        "url": "git+https://github.com/CandleLibrary/lantern.git"
     },
     "keywords": [
         "CFW"
@@ -23,9 +23,9 @@
     "author": "Anthony Weathersby",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/candlefw/lantern/issues"
+        "url": "https://github.com/CandleLibrary/lantern/issues"
     },
-    "homepage": "https://github.com/candlefw/lantern#readme",
+    "homepage": "https://github.com/CandleLibrary/lantern#readme",
     "dependencies": {
         "@candlelib/library": "0.0.1",
         "@candlelib/conflagrate": "0.1.1",

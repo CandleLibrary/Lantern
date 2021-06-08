@@ -1,7 +1,7 @@
 /**[API]:testing
  *
  * With the cfw_libraries dispatcher enabled
- * should be able to load candlefw files within
+ * should be able to load CandleLibrary files within
  * a browser.
  */
 

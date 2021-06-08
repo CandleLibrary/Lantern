@@ -16,7 +16,7 @@
  */
 
 import URL from "@candlelib/url";
-import { getPackageJsonObject, getProcessArgs } from "@candlelib/wax";
+import { getPackageJsonObject, getProcessArgs } from "@candlelib/paraffin";
 import $404_dispatch from "./build/library/dispatchers/404_dispatch.js";
 import candle_library_dispatch from "./build/library/dispatchers/candle_library_dispatch.js";
 import cfw_favicon_dispatch from "./build/library/dispatchers/cfw_favicon_dispatch.js";
