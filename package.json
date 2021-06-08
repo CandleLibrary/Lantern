@@ -27,7 +27,6 @@
     },
     "homepage": "https://github.com/CandleLibrary/lantern#readme",
     "dependencies": {
-        "@candlelib/library": "0.0.1",
         "@candlelib/conflagrate": "0.1.1",
         "@candlelib/css": "0.2.8",
         "@candlelib/glow": "0.3.3",
