@@ -25,12 +25,9 @@ import filesystem_dispatch from "./build/library/dispatchers/filesystem_dispatch
 import poller_dispatch from "./build/library/dispatchers/poller_dispatch.js";
 import lantern from "./build/library/lantern.js";
 
-
-console.log(new URL(import.meta.url).path);
 const
     { package: pkg } = await getPackageJsonObject(new URL(import.meta.url).path),
     HELP_MESSAGE = `
-
 CANDLELIB::Lantern ${pkg.version}
 
 A development server for CandleLibrary projects. 
