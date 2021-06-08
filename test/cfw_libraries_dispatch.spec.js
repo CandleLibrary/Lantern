@@ -5,7 +5,7 @@
  * a browser.
  */
 
-import url from "@candlelib/url";
+import url from "@candlelib/uri";
 assert_group("URL Global Should Match Window Location", () => {
     assert(url !== undefined, browser);
     assert(url.GLOBAL + "" == window.location, browser);

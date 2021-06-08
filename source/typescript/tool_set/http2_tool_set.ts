@@ -1,4 +1,4 @@
-import URL from "@candlelib/url";
+import URL from "@candlelib/uri";
 import fs from "fs";
 import http2 from "http2";
 import path from "path";

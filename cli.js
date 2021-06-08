@@ -15,7 +15,7 @@
  * Contact: acweathersby.codes@gmail.com
  */
 
-import URL from "@candlelib/url";
+import URL from "@candlelib/uri";
 import { getPackageJsonObject, getProcessArgs } from "@candlelib/paraffin";
 import $404_dispatch from "./build/library/dispatchers/404_dispatch.js";
 import candle_library_dispatch from "./build/library/dispatchers/candle_library_dispatch.js";

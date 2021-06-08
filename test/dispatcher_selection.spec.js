@@ -7,7 +7,7 @@
  */
 import { AddDispatch, getDispatches } from "@candlelib/lantern/build/library/dispatcher.js";
 import ext_map from "@candlelib/lantern/build/library/extension_map.js";
-import URL from "@candlelib/url";
+import URL from "@candlelib/uri";
 
 const
     DispatchMap = new Map(),

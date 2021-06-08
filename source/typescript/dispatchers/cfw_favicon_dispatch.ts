@@ -1,7 +1,7 @@
 
 import { Dispatcher } from "../types/types";
 import ext_map, { addKey } from "../extension/extension_map.js";
-import URL from "@candlelib/url";
+import URL from "@candlelib/uri";
 import path from "path";
 import fs from "fs";
 

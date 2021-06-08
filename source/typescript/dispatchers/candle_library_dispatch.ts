@@ -3,7 +3,7 @@ import fs from "fs";
 import { Dispatcher } from "../types/types";
 import ext_map from "../extension/extension_map.js";
 import { getPackageJsonObject } from "@candlelib/paraffin";
-import URL from "@candlelib/url";
+import URL from "@candlelib/uri";
 
 const fsp = fs.promises;
 let READY = false;

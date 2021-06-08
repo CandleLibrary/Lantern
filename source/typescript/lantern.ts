@@ -1,4 +1,4 @@
-import URL from "@candlelib/url";
+import URL from "@candlelib/uri";
 import { getPackageJsonObject } from "@candlelib/paraffin";
 
 import http2 from "http2";

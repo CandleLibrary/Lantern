@@ -34,7 +34,7 @@
         "@candlelib/hydrocarbon": "0.8.1-alpha-2",
         "@candlelib/js": "0.4.0",
         "@candlelib/spark": "0.2.0",
-        "@candlelib/url": "0.1.5",
+        "@candlelib/uri": "0.1.5",
         "@candlelib/wick": "0.12.7",
         "@candlelib/wind": "0.4.4",
         "node-watch": "^0.6.3"
