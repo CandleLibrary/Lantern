@@ -42,7 +42,7 @@ export interface LanternConstructor {
      * Starts the server
      */
     (config_options: LanternConstructorOptions, logger?: LanternLoggingOutput):
-        Promise<LanternServer<http2.Http2Server> | LanternServer<http2.Http2Server>>;
+        Promise<LanternServer<http2.Http2Server> | LanternServer<http2.Http2SecureServer>>;
 
     /**
      * A self-signed TSL RSA certificate and key pair for
@@ -66,7 +66,7 @@ export interface LanternConstructor {
 const lantern: LanternConstructor = Object.assign(async function (
     config_options: LanternConstructorOptions,
     logger?: LanternLoggingOutput
-): Promise<LanternServer<http2.Http2Server> | LanternServer<http2.Http2Server>> {
+): Promise<LanternServer<http2.Http2Server> | LanternServer<http2.Http2SecureServer>> {
 
 
     await URL.server();
@@ -105,7 +105,15 @@ const lantern: LanternConstructor = Object.assign(async function (
                 if (!(await dispatcher(tool_set, request_data, log_queue, DispatchMap, ext_map)))
                     dispatcher.default(404, tool_set, request_data, log_queue, DispatchDefaultMap, ext_map);
             } catch (e) {
+
+                if (e.code == "EACCES") {
+                    console.log(`
+                        Port ${options.port} could not be connected to.
+                    `);
+                }
+
                 log_queue.createLocalLog("Error").sub_error(e).delete();
+
                 dispatcher.default(404, tool_set, request_data, log_queue, DispatchDefaultMap, ext_map);
             }
         };
