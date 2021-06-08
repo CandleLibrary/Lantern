@@ -71,7 +71,9 @@ https://github.com/h5bp/html5-boilerplate
     `,
     response_code: 404,
     MIME: "text/html",
-    respond: $404,
+    respond: (tools) => {
+        return tools.sendUTF8String($404 + " " + tools.url);
+    },
     keys:
     {
         ext: 0xFFFFFFFF,
