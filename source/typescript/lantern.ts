@@ -8,6 +8,8 @@ import $404_dispatch from "./dispatchers/404_dispatch.js";
 import candle_library_dispatch from "./dispatchers/candle_library_dispatch.js";
 import dispatcher from "./dispatchers/dispatch.js";
 import poller_dispatch from "./dispatchers/poller_dispatch.js";
+import compiled_wick_dispatch from "./dispatchers/compiled_wick_dispatch.js";
+import filesystem_dispatch from "./dispatchers/filesystem_dispatch.js";
 import ext_map from "./extension/extension_map.js";
 
 import { HTTPS2ToolSet } from "./tool_set/http2_tool_set.js";
@@ -26,9 +28,11 @@ import { LanternLoggingOutput, setLogger, LogQueue } from "./utils/log.js";
 export {
     poller_dispatch,
     candle_library_dispatch,
-    $404_dispatch
+    $404_dispatch,
+    compiled_wick_dispatch,
+    filesystem_dispatch
 };
-export { Dispatcher, DispatchKey, LanternServer };
+export { Dispatcher, DispatchKey, LanternServer, ext_map };
 
 /**
  * Lantern Server Constructor
