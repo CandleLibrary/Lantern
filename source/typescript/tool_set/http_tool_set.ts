@@ -73,7 +73,7 @@ export class HTTPSToolSet extends LanternToolsBase {
 
         log.message(`${server_name} started`);
 
-        log.sub_message(`HTTP server listening on interface ${host}:${port}`);
+        log.sub_message(`HTTP server listening on interface ${host}:${port}. Visit http://${host}:${port} to view site`);
 
         if (config_options.secure)
             log.sub_message(`${server_name}: Using HTTPS/TLS secure protocol.`);
