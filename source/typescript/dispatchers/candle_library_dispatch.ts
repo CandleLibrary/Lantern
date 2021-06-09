@@ -47,7 +47,7 @@ export default <Dispatcher>{
         WICK    :   /@cl/wick
                     /@cl/wickrt
         GLOW    :   /@cl/glow
-        URL     :   /@cl/url
+        URI     :   /@cl/uri
         HTML    :   /@cl/html
         CSS     :   /@cl/css
         TS      :   /@cl/ts
@@ -71,7 +71,7 @@ export default <Dispatcher>{
             source_name = {
                 "wick-rt": "wick/entry-point/wick-runtime",
                 "wick": "wick/entry-point/wick-full",
-                "url": "url/url",
+                "uri": "uri/uri",
                 "glow": "glow/glow",
                 "html": "html/html",
                 "css": "css/css",
@@ -85,7 +85,7 @@ export default <Dispatcher>{
             file_path = dir_sections.slice(2).join("/").replace("build/library/", ""),
             return_path = ([
                 "wick",
-                "url",
+                "uri",
                 "glow",
                 "html",
                 "css",
