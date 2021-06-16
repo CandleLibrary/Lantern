@@ -75,7 +75,6 @@ export default <Dispatcher>{
                 "glow": "glow/glow",
                 "html": "html/html",
                 "css": "css/css",
-                "candle": "candle/cfw",
                 "hydrocarbon": "hydrocarbon/hydrocarbon",
                 "conflagrate": "conflagrate/conflagrate",
                 "wind": "wind/wind",

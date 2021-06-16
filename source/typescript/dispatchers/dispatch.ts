@@ -1,11 +1,10 @@
 import URL from "@candlelib/uri";
-
-import http2 from "http2";
-import default_dispatch from "./default_dispatch.js";
-import { Dispatcher, ToolSet } from "../types/types.js";
-import { RequestData } from "../types/request_data";
 import LanternToolsBase from "../tool_set/tools.js";
-import { LogQueue, Logger } from "../utils/log.js";
+import { RequestData } from "../types/request_data";
+import { Dispatcher } from "../types/types.js";
+import { Logger, LogQueue } from "../utils/log.js";
+import default_dispatch from "./default_dispatch.js";
+
 
 /** Error Messages ***/
 const e0x101 = "Dispatch object must include a function member named 'respond'. Error missing dispatch_object.respond.";
