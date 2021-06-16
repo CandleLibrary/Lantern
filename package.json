@@ -10,7 +10,7 @@
     },
     "scripts": {
         "prepublishOnly": "tsc -p ./tsconfig.json && yarn test",
-        "test": "candle.cure  --headless ./test/**",
+        "test": "candle.cure ./test/",
         "test.watch": "candle.cure -w ./test/**"
     },
     "repository": {
@@ -27,18 +27,15 @@
     },
     "homepage": "https://github.com/CandleLibrary/lantern#readme",
     "dependencies": {
-        "@candlelib/conflagrate": "0.1.1",
-        "@candlelib/css": "0.2.8",
-        "@candlelib/glow": "0.3.3",
-        "@candlelib/hydrocarbon": "0.8.1-alpha-2",
-        "@candlelib/js": "0.4.0",
-        "@candlelib/spark": "0.2.0",
-        "@candlelib/uri": "0.1.5",
-        "@candlelib/wick": "0.12.7",
-        "@candlelib/wind": "0.4.4",
+        "@candlelib/conflagrate": "*",
+        "@candlelib/css": "*",
+        "@candlelib/glow": "*",
+        "@candlelib/hydrocarbon": "*",
+        "@candlelib/js": "*",
+        "@candlelib/spark": "*",
+        "@candlelib/uri": "*",
+        "@candlelib/wick": "*",
+        "@candlelib/wind": "*",
         "node-watch": "^0.6.3"
-    },
-    "devDependencies": {
-        "@candlelib/cure": "0.5.0"
     }
 }
