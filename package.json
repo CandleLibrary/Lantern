@@ -9,8 +9,8 @@
         "lantern": "cli.js"
     },
     "scripts": {
-        "prepublishOnly": "tsc -p ./tsconfig.json && yarn test",
-        "test": "candle.cure ./test/",
+        "prepublishOnly": "rm -rf ./build && tsc & sleep 10",
+        "test": "candle.cure --headless ./test/",
         "test.watch": "candle.cure -w ./test/**"
     },
     "repository": {
