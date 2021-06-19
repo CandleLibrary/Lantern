@@ -40,7 +40,7 @@ export async function renderPage(
 export default <Dispatcher>{
     name: "WICK_COMPILER",
     description:
-        `Builds self-contained HTML pag from a Wick component entry-point`,
+        `Builds a self-contained HTML page from a single index.wick entry point`,
     MIME: "text/html",
     respond: async function (tools) {
 
