@@ -6,7 +6,7 @@
     "types": "./build/types/lantern.d.ts",
     "type": "module",
     "bin": {
-        "lantern": "cli.js"
+        "lantern": "index.js"
     },
     "scripts": {
         "prepublishOnly": "rm -rf ./build && tsc & sleep 10",
@@ -17,6 +17,12 @@
         "type": "git",
         "url": "git+https://github.com/CandleLibrary/lantern.git"
     },
+    "files": [
+        "/build",
+        "/README.md",
+        "/CHANGELOG.md",
+        "/LICENSE"
+    ],
     "keywords": [
         "CFW"
     ],
