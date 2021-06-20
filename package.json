@@ -1,6 +1,6 @@
 {
     "name": "@candlelib/lantern",
-    "version": "0.2.4",
+    "version": "0.2.6",
     "description": "Extensible Web Server",
     "main": "./build/library/lantern.js",
     "types": "./build/types/lantern.d.ts",
@@ -22,6 +22,7 @@
         "/README.md",
         "/CHANGELOG.md",
         "/LICENSE",
+        "/brand",
         "/index.js"
     ],
     "keywords": [
