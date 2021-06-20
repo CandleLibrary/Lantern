@@ -21,7 +21,8 @@
         "/build",
         "/README.md",
         "/CHANGELOG.md",
-        "/LICENSE"
+        "/LICENSE",
+        "/index.js"
     ],
     "keywords": [
         "CFW"
