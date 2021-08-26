@@ -28,12 +28,11 @@ export async function renderPage(
 ): Promise<string> {
 
     let
-        presets = wick.setPresets(),
-        component = await wick(source, presets);
+        component = await wick(source, null);
 
     if (!component) throw new Error("source is not a wick component!");
 
-    return (await wick.utils.RenderPage(component)).page;
+    return (await wick.utils.RenderPage(component, component.presets)).page;
 
 };
 
@@ -86,6 +85,6 @@ export default <Dispatcher>{
     },
 
     keys: [
-        { ext: ext_map.all, dir: "/*" },
+        { ext: ext_map.html | ext_map.wick, dir: "/*" },
     ]
 };

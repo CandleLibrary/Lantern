@@ -44,14 +44,16 @@ export default <Dispatcher>{
         Library :   src name
         ______________________
 
-        WICK    :   /@cl/wick
-                    /@cl/wickrt
-        GLOW    :   /@cl/glow
-        URI     :   /@cl/uri
-        HTML    :   /@cl/html
-        CSS     :   /@cl/css
-        TS      :   /@cl/ts
-        JS      :   /@cl/js
+        WICK            :   /@cl/wick
+                            /@cl/wickrt
+        WICK-Radiate    :   
+                             /@cl/wick-radiate
+        GLOW            :   /@cl/glow
+        URI             :   /@cl/uri
+        HTML            :   /@cl/html
+        CSS             :   /@cl/css
+        TS              :   /@cl/ts
+        JS              :   /@cl/js
 `,
     respond: async (tools) => {
         await Set();
@@ -71,11 +73,13 @@ export default <Dispatcher>{
             source_name = {
                 "wick-rt": "wick/entry-point/wick-runtime",
                 "wick": "wick/entry-point/wick-full",
+                "wick-radiate": "wick/entry-point/wick-radiate",
                 "uri": "uri/uri",
+                "url": "uri/uri",
                 "glow": "glow/glow",
                 "html": "html/html",
                 "css": "css/css",
-                "hydrocarbon": "hydrocarbon/hydrocarbon",
+                "hydrocarbon": "hydrocarbon/entry/runtime",
                 "conflagrate": "conflagrate/conflagrate",
                 "wind": "wind/wind",
                 "spark": "spark/spark",
@@ -109,7 +113,7 @@ export default <Dispatcher>{
             tools.setMIMEBasedOnExt(ext || "js");
             return tools.sendUTF8String(
                 str
-                    .replace(/\"\@candlelib\/([^\/\"]+)\/?/g, "\"/@cl\/$1/")
+                    .replace(/(["'])\@candlelib\/([^\/\"\']+)\/?/g, "$1/@cl\/$2/")
                     .replace(/^\s*import(.+)from\s*("|')([^"']+)("|')\;/g, (m, import_clause, _, path_str, __) => {
                         // Convert all relative filepaths to absolute paths 
                         // This helps ensure consistent model import behavior
