@@ -7,7 +7,7 @@ import wick, {
     WickLibrary
 } from "@candlelib/wick";
 
-import ext_map from "../extension/extension_map.js";
+import ext_map, { addKey } from "../extension/extension_map.js";
 
 
 /**
@@ -26,14 +26,16 @@ export async function renderPage(
     source: string,
     wick: WickLibrary
 ): Promise<string> {
-
     let
         component = await wick(source, null);
 
     if (!component) throw new Error("source is not a wick component!");
-
-    return (await wick.utils.RenderPage(component, component.presets)).page;
-
+    try {
+        return (await wick.utils.RenderPage(component, component.presets)).page;
+    } catch (e) {
+        console.log(e);
+        throw e;
+    }
 };
 
 export default <Dispatcher>{
@@ -41,6 +43,13 @@ export default <Dispatcher>{
     description:
         `Builds a self-contained HTML page from a single index.wick entry point`,
     MIME: "text/html",
+    init(lantern, dispatcher) {
+
+        lantern.addExtension("wick", "text/html");
+        lantern.addExtension("html", "text/html");
+
+        dispatcher.keys = [{ ext: ext_map.wick | ext_map.html | ext_map.none, dir: "/*" }];
+    },
     respond: async function (tools) {
 
         //load wick data 
@@ -84,7 +93,5 @@ export default <Dispatcher>{
         return false;
     },
 
-    keys: [
-        { ext: ext_map.html | ext_map.wick, dir: "/*" },
-    ]
+    keys: []
 };

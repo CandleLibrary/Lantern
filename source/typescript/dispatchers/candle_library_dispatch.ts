@@ -35,11 +35,23 @@ async function Set() {
 }
 
 export default <Dispatcher>{
+    init(lantern, dispatch) {
+
+        lantern.addExtension("map", "application/json");
+        lantern.addExtension("ts", "application/javascript");
+        lantern.addExtension("js", "application/javascript");
+        lantern.addExtension("wasm", "application/wasm");
+
+        const ext = ext_map.none | ext_map.js | ext_map.ts | ext_map.map | ext_map.wasm;
+
+        dispatch.keys = [{ ext, dir: "/*" }, { ext, dir: "/@cl" }];
+    },
+
     name: "CandleLib Development Built-ins",
 
     description: `Serves Candle libraries from the virtual directories [@cl] or [@candlelib]
     
-    Available libraries:
+    Available libraries: (@cl can be freely replaced with @candlelib)
 
         Library :   src name
         ______________________
@@ -54,9 +66,16 @@ export default <Dispatcher>{
         CSS             :   /@cl/css
         TS              :   /@cl/ts
         JS              :   /@cl/js
+        HYDROCARBON-RUNTIME     
+                        :   /@cl/hc
+                        :    /@cl/hydrocarbon 
+        HYDROCARBON-FULL     
+                        :   /@cl/hc-full
+                        :    /@cl/hydrocarbon-full
 `,
     respond: async (tools) => {
         await Set();
+
 
         const url = tools.url,
             ext = url.ext,
@@ -79,6 +98,9 @@ export default <Dispatcher>{
                 "glow": "glow/glow",
                 "html": "html/html",
                 "css": "css/css",
+                "hc-full": "hydrocarbon/entry/hydrocarbon",
+                "hydrocarbon-full": "hydrocarbon/entry/hydrocarbon",
+                "hc": "hydrocarbon/entry/runtime",
                 "hydrocarbon": "hydrocarbon/entry/runtime",
                 "conflagrate": "conflagrate/conflagrate",
                 "wind": "wind/wind",
@@ -106,31 +128,56 @@ export default <Dispatcher>{
         }
 
 
-
         if (return_path !== "") {
-            tools.log(file_path, return_path);
-            const str = await tools.getUTF8FromFile(return_path);
-            tools.setMIMEBasedOnExt(ext || "js");
-            return tools.sendUTF8String(
-                str
-                    .replace(/(["'])\@candlelib\/([^\/\"\']+)\/?/g, "$1/@cl\/$2/")
-                    .replace(/^\s*import(.+)from\s*("|')([^"']+)("|')\;/g, (m, import_clause, _, path_str, __) => {
-                        // Convert all relative filepaths to absolute paths 
-                        // This helps ensure consistent model import behavior
-                        // and prevents duplicate requests that only differ
-                        // in the relative path base location
-                        let dest = new URL(path_str);
+            if (ext == "wasm") {
+                tools.setMIMEBasedOnExt();
+                console.log({ ext: tools._ext, mime: tools.pending_headers });
+                return tools.sendRawStreamFromFile(return_path);
+            } else if (ext == "map") {
 
-                        if (dest.IS_RELATIVE) {
-                            dest = URL.resolveRelative(dest, tools.url);
-                        }
+                return tools.sendUTF8FromFile(return_path);
 
-                        return `\nimport ${import_clause} from \"${dest.path}\"`;
-                    })
-            );
+            } else if (ext == "ts") {
+
+                const
+                    file_name = url.filename;
+                //Can only be from a source map, so deliver from host folder based on the source 
+                //root directory
+                //Replace build/library with source/typescript
+
+
+                return tools.sendUTF8FromFile(return_path.replace("build/library", "source/typescript"));
+            } else {
+                tools.log(file_path, return_path);
+                const str = await tools.getUTF8FromFile(return_path);
+                tools.setMIMEBasedOnExt(ext || "js");
+                return tools.sendUTF8String(
+                    str
+                        .replace(/(["'])\@candlelib\/([^\/\"\']+)\/?/g, "$1/@cl\/$2/")
+                        .replace(/^\s*import(.+)from\s*("|')([^"']+)("|')\;/g, (m, import_clause, _, path_str, __) => {
+                            // Convert all relative filepaths to absolute paths 
+                            // This helps ensure consistent model import behavior
+                            // and prevents duplicate requests that only differ
+                            // in the relative path base location
+                            let dest = new URL(path_str);
+
+                            if (dest.host)
+
+                                console.log(path_str, dest);
+
+                            if (dest.IS_RELATIVE) {
+                                dest = URL.resolveRelative(dest, tools.url);
+                            }
+
+                            return `\nimport ${import_clause} from \"${dest.path}\"`;
+                        })
+                );
+            }
+        } else if (ext == "wasm") {
+            console.log({ tools, dir, return_path });
         }
 
         return false;
-    },
-    keys: [{ ext: ext_map.all, dir: "/*" }, { ext: ext_map.all, dir: "/@cl" }]
+    }
+
 };

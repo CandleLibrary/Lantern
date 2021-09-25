@@ -78,7 +78,7 @@ where {dirs} is a list of domain directories separated by a semicolon [;]`,
             tools.setMIME();
 
             return tools.sendUTF8String(`
-                import URL from "/@cl/url";
+                import URL from "/@cl/uri";
                     const url = new URL("/lantern-poll/poll");
                     const base_url = new URL();
                     setInterval(async function() {
