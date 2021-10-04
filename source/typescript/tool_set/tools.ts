@@ -37,9 +37,6 @@ export default abstract class LanternToolsBase implements ToolSet {
             tool = new (<any>cstr)(distribution_object, data, log);
         }
 
-        if (tool == null)
-            console.log({ cache });
-
         return tool;
     };
 
@@ -193,7 +190,7 @@ export default abstract class LanternToolsBase implements ToolSet {
         return DISPATCH_SUCCESSFUL;
     }
 
-    setMIMEBasedOnExt(ext = "") {
+    setMIMEBasedOnExt(ext = this._ext) {
         let MIME = "text/plain";
 
         if (!this._ext)
