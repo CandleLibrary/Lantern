@@ -86,6 +86,7 @@ export function getDispatches(request_data: RequestData, DispatchMap, ext_map):
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value;
 
+
     let dispatch_set: Set<Dispatcher> = new Set;
 
     for (let i = 0; i < keys.length; i++) {
@@ -110,6 +111,8 @@ export default async function dispatcher<T>(tool_set, request_data: RequestData,
         dispatch_objects = getDispatches(request_data, DispatchMap, ext_map) ?? DispatchMap.get(base_key) ?? [default_dispatch],
         //Used to keep all relevant messages in one block of text when logging.
         local_log = log_queue.createLocalLog(`Log of request for ${url}:`);
+
+
 
     local_log.message(`Responding with dispatchers [${dispatch_objects
         .map((dsp, i) => `${i + 1}: ${dsp.name}`)
@@ -137,6 +140,7 @@ dispatcher.default = async function (code, tool_set, request_data: RequestData, 
 
     if (ext)
         ext_flag = ext_map[ext] || 0x8000000; // The "Any Extension" value; 
+
 
     let extended_key = `${ext_flag.toString(16)}${code}${dir}`;
     let base_key = `${ext_flag.toString(16)}${code}`;
@@ -252,6 +256,8 @@ function AddCustomDispatch(log_queue: LogQueue, dispatch_object, DispatchMap, De
         dispatch_object.MIME = "text/plain";
 
     log.delete();
+
+
 
     return this;
 }

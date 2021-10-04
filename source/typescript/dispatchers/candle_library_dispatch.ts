@@ -51,27 +51,37 @@ export default <Dispatcher>{
 
     description: `Serves Candle libraries from the virtual directories [@cl] or [@candlelib]
     
-    Available libraries: (@cl can be freely replaced with @candlelib)
+Available libraries: (@cl can be freely replaced with @candlelib)
 
-        Library :   src name
-        ______________________
+    Library             :   src name
+    ____________________________________________
 
-        WICK            :   /@cl/wick
+    WICK                :   /@cl/wick
                             /@cl/wickrt
-        WICK-Radiate    :   
-                             /@cl/wick-radiate
-        GLOW            :   /@cl/glow
-        URI             :   /@cl/uri
-        HTML            :   /@cl/html
-        CSS             :   /@cl/css
-        TS              :   /@cl/ts
-        JS              :   /@cl/js
-        HYDROCARBON-RUNTIME     
-                        :   /@cl/hc
-                        :    /@cl/hydrocarbon 
-        HYDROCARBON-FULL     
-                        :   /@cl/hc-full
-                        :    /@cl/hydrocarbon-full
+                            
+    WICK-Radiate        :   /@cl/wick-radiate
+
+    GLOW                :   /@cl/glow
+
+    URI                 :   /@cl/uri
+
+    HTML                :   /@cl/html
+
+    CSS                 :   /@cl/css
+
+    TS                  :   /@cl/ts
+
+    JS                  :   /@cl/js
+
+    FLAME               :   /@cl/flame
+
+    LOG                 :   /@cl/log
+
+    HYDROCARBON-RUNTIME :   /@cl/hc
+                        :   /@cl/hydrocarbon 
+
+    HYDROCARBON-FULL    :   /@cl/hc-full
+                        :   /@cl/hydrocarbon-full
 `,
     respond: async (tools) => {
         await Set();
@@ -91,10 +101,12 @@ export default <Dispatcher>{
         const pkg = dir_sections[1],
             source_name = {
                 "wick-rt": "wick/entry-point/wick-runtime",
-                "wick": "wick/entry-point/wick-full",
+                "wick": "wick/entry-point/wick-runtime",
+                "wick-full": "wick/entry-point/wick-runtime",
                 "wick-radiate": "wick/entry-point/wick-radiate",
+                "flame": "flame/entry/flame",
+                "log": "log/logger",
                 "uri": "uri/uri",
-                "url": "uri/uri",
                 "glow": "glow/glow",
                 "html": "html/html",
                 "css": "css/css",
@@ -120,18 +132,23 @@ export default <Dispatcher>{
                 "wind",
                 "spark",
                 "js",
+                "flame",
+                "log",
             ].includes(pkg)
                 ? path.join(CFW_DIR, pkg, "build/library", file_path || (source_name + ".js"))
                 : "");
+
         if ((!file_path || file_path == "/") && source_name) {
             return tools.redirect(`/@cl/${source_name}.js`);
         }
 
-
         if (return_path !== "") {
+
             if (ext == "wasm") {
                 tools.setMIMEBasedOnExt();
+
                 console.log({ ext: tools._ext, mime: tools.pending_headers });
+
                 return tools.sendRawStreamFromFile(return_path);
             } else if (ext == "map") {
 
@@ -148,9 +165,13 @@ export default <Dispatcher>{
 
                 return tools.sendUTF8FromFile(return_path.replace("build/library", "source/typescript"));
             } else {
+
                 tools.log(file_path, return_path);
+
                 const str = await tools.getUTF8FromFile(return_path);
+
                 tools.setMIMEBasedOnExt(ext || "js");
+
                 return tools.sendUTF8String(
                     str
                         .replace(/(["'])\@candlelib\/([^\/\"\']+)\/?/g, "$1/@cl\/$2/")
