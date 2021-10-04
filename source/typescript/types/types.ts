@@ -1,4 +1,5 @@
 import URL from "@candlelib/uri";
+import { LanternServer } from './lantern_server';
 
 
 export interface ToolSet {
@@ -183,7 +184,15 @@ export interface Dispatcher {
      * response code `200` (if Dispatcher.response_code is not set) and
      * MIME type `text/plain` (if Dispatcher.MIME is not set)
      */
-    respond: ((tools: ToolSet) => Promise<boolean>) | string | ArrayBuffer | Buffer;
+    respond: ((tools: ToolSet) => Promise<boolean>) | string | ArrayBuffer;
+
+    /**
+     * Function that is called when the server loads the dispatcher. Allows the 
+     * dispatcher to hook into server methods and extend the server functionality.
+     * 
+     * e.g. Use this function to register new extension types through `server.addExtension(extension_name)`
+     */
+    init?: (lantern: LanternServer<any>, dispatcher: this) => void;
 }
 
 
