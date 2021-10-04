@@ -1,24 +1,20 @@
-
+import { Logger as LoggerClass } from "@candlelib/log";
 export type LanternLoggingOutput = {
     log: (..._) => any,
     error: (..._) => any,
 };
 
-let logger: LanternLoggingOutput = console;
-export function setLogger(l: LanternLoggingOutput = console) {
-    logger = l;
-}
+export function setLogger(l: LanternLoggingOutput) { }
 
-const log = (...m) => { logger.log("\n", ...m, "\n"); };
-log.error = (...m) => { logger.error(...m, "\n"); };
-log.verbose = (...m) => { logger.log(...m, "\n"); };
+const CoreLogger = LoggerClass.createLogger("lantern");
+
+const log = CoreLogger.log.bind(CoreLogger);
+log.error = (...m) => { CoreLogger.error(...m, "\n"); };
+log.verbose = (...m) => { CoreLogger.log(...m, "\n"); };
 log.message = log;
 log.subject = log;
-log.sub_message = (...m) => { logger.log(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
-log.sub_error = (...m) => { logger.error(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
-
-
-const local_log_queue = [];
+log.sub_message = (...m) => { CoreLogger.log(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
+log.sub_error = (...m) => { CoreLogger.error(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
 
 export class Logger {
 
@@ -32,12 +28,13 @@ export class Logger {
 
     next: Logger;
 
-    logger: (...str: string[]) => void;
+
+    log: (...str: string[]) => void;
 
     private delete_fn: (arg: Logger) => void;
 
     constructor(logger, delete_fn: (arg: Logger) => void) {
-        this.logger = logger;
+        this.log = logger;
         this.identifier = "";
         this.messages = [];
         this.delete_fn = delete_fn;
@@ -46,7 +43,7 @@ export class Logger {
 
         if (!SILENT)
             if (this.messages.length > 0)
-                this.logger("\n", `${this.identifier}:`, this.messages
+                this.log("\n", `${this.identifier}:`, this.messages
                     .map((str, i) => i > 0 ? "\t" + str : str)
                     .join("\n"));
 
@@ -74,9 +71,9 @@ export class LogQueue {
 
     queue: Logger;
 
-    logger: (...str: string[]) => void;
-    constructor(log: (...str: string[]) => void) {
-        this.logger = log;
+    log: (...str: string[]) => void;
+    constructor(_: (...str: string[]) => void) {
+        this.log = log;
         this.createLocalLog("").delete();
     }
 
@@ -97,7 +94,7 @@ export class LogQueue {
         if (logger)
             this.queue = logger.next;
         else
-            logger = new Logger(this.logger, this.delete.bind(this));
+            logger = new Logger(this.log, this.delete.bind(this));
 
         logger.identifier = identifier;
 
