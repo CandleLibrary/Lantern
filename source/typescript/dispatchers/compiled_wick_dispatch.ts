@@ -48,7 +48,7 @@ export default <Dispatcher>{
         lantern.addExtension("wick", "text/html");
         lantern.addExtension("html", "text/html");
 
-        dispatcher.keys = [{ ext: ext_map.wick | ext_map.html | ext_map.none, dir: "/*" }];
+        dispatcher.keys = [{ ext: ext_map.wick | ext_map.none, dir: "/*" }];
     },
     respond: async function (tools) {
 
@@ -71,12 +71,6 @@ export default <Dispatcher>{
             try {
                 if (await fsp.stat(path.join(cwd, tools.dir, "index.wick")))
                     url = path.join(cwd, tools.dir, "index.wick");
-            } catch (e) { }
-
-
-            try {
-                if (await fsp.stat(path.join(cwd, tools.dir, "index.html")))
-                    url = path.join(cwd, tools.dir, "index.html");
             } catch (e) { }
 
             if (!url) return false;
