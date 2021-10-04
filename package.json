@@ -37,6 +37,7 @@
     "dependencies": {
         "@candlelib/conflagrate": "0.4.3",
         "@candlelib/css": "0.3.8",
+        "@candlelib/log": "*",
         "@candlelib/glow": "0.4.7",
         "@candlelib/hydrocarbon": "0.11.7",
         "@candlelib/js": "0.5.8",
