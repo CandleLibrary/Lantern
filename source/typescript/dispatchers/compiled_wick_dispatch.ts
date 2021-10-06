@@ -31,7 +31,7 @@ export async function renderPage(
 
     if (!component) throw new Error("source is not a wick component!");
     try {
-        return (await wick.utils.RenderPage(component, component.presets)).page;
+        return (await wick.utils.RenderPage(component, component.context)).page;
     } catch (e) {
         console.log(e);
         throw e;

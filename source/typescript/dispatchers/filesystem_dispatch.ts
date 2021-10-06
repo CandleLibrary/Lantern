@@ -17,7 +17,7 @@ export default <Dispatcher>{
             //look for index html;
             tools.setMIME();
 
-            return tools.sendUTF8FromFile(path.join(tools.dir, tools.file || "", "index.html"));
+            return tools.sendUTF8FromFile(path.join(tools.cwd, tools.dir, tools.file || "", "index.html"));
         }
 
         tools.setMIMEBasedOnExt();
