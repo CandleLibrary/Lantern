@@ -3,7 +3,7 @@ export interface LanternConstructorOptions {
     /**
      * The type of protocol to use with the server.
      */
-    type?: "http" | "https" | "http2" | "https2";
+    type?: "http" | "https" | "http2" | "http2s";
     /**
      * Network port
      */

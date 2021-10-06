@@ -104,7 +104,7 @@ Available libraries: (@cl can be freely replaced with @candlelib)
                 "wick": "wick/entry-point/wick-runtime",
                 "wick-full": "wick/entry-point/wick-runtime",
                 "wick-radiate": "wick/entry-point/wick-radiate",
-                "flame": "flame/entry/flame",
+                "flame": "flame/entry/client",
                 "log": "log/logger",
                 "uri": "uri/uri",
                 "glow": "glow/glow",
