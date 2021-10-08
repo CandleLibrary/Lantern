@@ -10,11 +10,15 @@ const CoreLogger = LoggerClass.createLogger("lantern");
 
 const log = CoreLogger.log.bind(CoreLogger);
 log.error = (...m) => { CoreLogger.error(...m, "\n"); };
-log.verbose = (...m) => { CoreLogger.log(...m, "\n"); };
+log.verbose = (...m) => { CoreLogger.debug(...m, "\n"); };
+
 log.message = log;
+
 log.subject = log;
-log.sub_message = (...m) => { CoreLogger.log(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
-log.sub_error = (...m) => { CoreLogger.error(`\t`, ...(m.flatMap(m => (m + "").split("\n").join("\n\t")))); };
+
+log.sub_message = (...m) => { CoreLogger.debug(...(m.flatMap(m => (m + "").split("\n").join("\n  ")))); };
+
+log.sub_error = (...m) => { CoreLogger.error(...(m.flatMap(m => (m + "").split("\n").join("\n  ")))); };
 
 export class Logger {
 
@@ -43,9 +47,9 @@ export class Logger {
 
         if (!SILENT)
             if (this.messages.length > 0)
-                this.log("\n", `${this.identifier}:`, this.messages
-                    .map((str, i) => i > 0 ? "\t" + str : str)
-                    .join("\n"));
+                this.log(`${this.identifier}:`, this.messages
+                    .map((str, i) => i > 0 ? "    " + str : str)
+                    .join("\n     "));
 
         this.messages.length = 0;
 
