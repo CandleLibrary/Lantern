@@ -6,20 +6,20 @@
  */
 
 import url from "@candlelib/uri";
-assert_group("URL Global Should Match Window Location", () => {
+assert_group(skip, "URL Global Should Match Window Location", () => {
     assert(url !== undefined, browser);
     assert(url.GLOBAL + "" == window.location, browser);
 });
 
 import wind from "@candlelib/wind";
-assert_group("Wind should parse window.location string and tokenize [https]", sequence, () => {
+assert_group(skip, "Wind should parse window.location string and tokenize [https]", sequence, () => {
     const lex = wind(window.location + "");
     assert(lex.tx == "https", browser);
     assert(lex.ty == lex.types.id, browser);
 });
 
 import wick from "@candlelib/wick";
-assert_group("Wick Component", () => {
+assert_group(skip, "Wick Component", () => {
     const comp_data = await wick("<div>hello world</div>");
     const comp = new comp_data.class();
     comp.appendToDOM(document.body);
@@ -27,7 +27,7 @@ assert_group("Wick Component", () => {
 });
 
 import glow from "@candlelib/glow";
-assert_group("Glow Animation", () => {
+assert_group(skip, "Glow Animation", () => {
     const seq = glow.createSequence({
         obj: document.body,
         color: [{
