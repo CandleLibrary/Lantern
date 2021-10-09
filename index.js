@@ -45,7 +45,7 @@ A development server for CandleLibrary projects.
         Alternatively, \`random\` can be specified to allow Lantern to choose 
         an available, random port number.
 
-        If a port number or \`random\` is not specified, the Lantern will use
+        If a port number or \`random\` is not specified, then Lantern will use
         the port number assigned to LANTERN_PORT environment variable. If if
         LANTERN_PORT has no value, then the default port 8080 or a random port
         number will be chosen.
@@ -84,6 +84,10 @@ if (args.help) {
     console.log(HELP_MESSAGE);
     process.exit(0);
 }
+
+import { Logger } from "@candlelib/log";
+
+Logger.get("lantern").activate();
 
 const server = await lantern({ port: await getPortNumber() });
 
