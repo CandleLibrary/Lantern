@@ -108,7 +108,6 @@ export class HTTPSToolSet extends LanternToolsBase {
 
 
     async readData() {
-
         if (this.data)
             return this.data;
 
@@ -127,7 +126,7 @@ export class HTTPSToolSet extends LanternToolsBase {
 
             req.on("end", () => {
                 this.data = body;
-                res();
+                res(this.data);
             });
         });
     }
