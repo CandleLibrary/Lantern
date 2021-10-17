@@ -23,7 +23,7 @@ async function respond(d_objs: Array<Dispatcher>, tool_set: LanternToolsBase, re
 
         SILENT = typeof (do_.SILENT) == "number"
             ? do_.SILENT++ > 100
-                ? (log.sub_message(`Dispatch [${do_.name}] kept silent for 100 requests`), do_.SILENT = 0, false)
+                ? (log.debug(`Dispatch [${do_.name}] kept silent for 100 requests`), do_.SILENT = 0, false)
                 : true
             : false;
 
@@ -114,7 +114,7 @@ export default async function dispatcher<T>(tool_set, request_data: RequestData,
 
 
 
-    local_log.message(`Responding with dispatchers [${dispatch_objects
+    local_log.debug(`Responding with dispatchers [${dispatch_objects
         .map((dsp, i) => `${i + 1}: ${dsp.name}`)
         .join(", ")
         }]`);
@@ -250,7 +250,7 @@ function AddCustomDispatch(log_queue: LogQueue, dispatch_object, DispatchMap, De
 
     const width = process.stdout.columns - 1;
 
-    log.message(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width)}  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width)}\n`);
+    log.debug(`Added Dispatch [${dispatch_object.name}]: \n${("=").repeat(width - 20)}\n  ${dispatch_object.description ? dispatch_object.description : "No Description"}\n${("=").repeat(width - 20)}\n`);
 
     if (typeof (dispatch_object.MIME) !== "string")
         dispatch_object.MIME = "text/plain";

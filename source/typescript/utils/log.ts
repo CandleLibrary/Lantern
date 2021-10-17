@@ -1,4 +1,4 @@
-import { Logger as LoggerClass } from "@candlelib/log";
+import { Logger as LoggerClass, LogLevel } from "@candlelib/log";
 export type LanternLoggingOutput = {
     log: (..._) => any,
     error: (..._) => any,
@@ -26,7 +26,7 @@ export class Logger {
 
     identifier: string;
 
-    messages: Array<string>;
+    messages: Array<{ level: "log" | "dbg", str: string; }>;
 
     dispatcher_name: string;
 
@@ -46,10 +46,12 @@ export class Logger {
     delete(SILENT = false) {
 
         if (!SILENT)
-            if (this.messages.length > 0)
-                this.log(`${this.identifier}:`, this.messages
-                    .map((str, i) => i > 0 ? "    " + str : str)
-                    .join("\n     "));
+            if (this.messages.length > 0) {
+
+                for (const { level, str } of this.messages) {
+                    CoreLogger[level == "dbg" ? "debug" : "log"](`${this.identifier}:`, str);
+                }
+            }
 
         this.messages.length = 0;
 
@@ -58,15 +60,23 @@ export class Logger {
         this.delete_fn(this);
     }
     message(...v) {
-        this.messages.push(...(v.map(v => v + "")));
+        this.messages.push(...(v.map(v => (<any>{ level: "log", str: v + "" }))));
+        return this;
+    }
+
+    debug(...v) {
+
+        if ((CoreLogger.ACTIVE & LogLevel.DEBUG) == 0)
+            return this;
+        this.messages.push(...(v.map(v => (<any>{ level: "dbg", str: v + "" }))));
         return this;
     }
     sub_message(...v) {
-        this.messages.push(...(v.map(v => v + "")));
+        this.messages.push(...(v.map(v => (<any>{ level: "log", str: v + "" }))));
         return this;
     }
     sub_error(...v) {
-        this.messages.push(...(v.map(v => v + "")));
+        this.messages.push(...(v.map(v => (<any>{ level: "log", str: v + "" }))));
         return this;
     }
 }

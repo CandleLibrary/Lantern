@@ -38,9 +38,9 @@ export function addKey(key, ext_map, log: LogQueue = null) {
 	if (!ext_map[key] && key_offset < 31) {
 		ext_map[key] = 1 << key_offset++;
 		if (log)
-			log.createLocalLog("Extension").message(`Added new extension [*.${key}] with value ${ext_map[key]}`).delete();
+			log.createLocalLog("Extension").debug(`Added new extension [*.${key}] with value ${ext_map[key]}`).delete();
 		else
-			Logger.get("lantern").log(`Extension: Added new extension [*.${key}] with value ${ext_map[key]}`);
+			Logger.get("lantern").debug(`Extension: Added new extension [*.${key}] with value ${ext_map[key]}`);
 	}
 
 	return ext_map[key] || 0xFFFFFFFF;
