@@ -100,10 +100,10 @@ Available libraries: (@cl can be freely replaced with @candlelib)
 
         const pkg = dir_sections[1],
             source_name = {
-                "wick-rt": "wick/entry-point/wick-runtime",
-                "wick": "wick/entry-point/wick-runtime",
-                "wick-full": "wick/entry-point/wick-runtime",
-                "wick-radiate": "wick/entry-point/wick-radiate",
+                "wick-rt": "wick/entry/wick-runtime",
+                "wick": "wick/entry/wick-runtime",
+                "wick-full": "wick/entry/wick-runtime",
+                "wick-radiate": "wick/entry/wick-radiate",
                 "flame": "flame/entry/client",
                 "log": "log/logger",
                 "uri": "uri/uri",
