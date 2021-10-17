@@ -139,7 +139,7 @@ export default abstract class LanternToolsBase implements ToolSet {
      * serve files. 
      */
     get cwd() {
-        return CWD;
+        return this.do.cwd;
     }
 
     get filename(): string {

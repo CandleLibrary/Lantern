@@ -33,9 +33,23 @@ export function createLanternServer<K>(options: LanternConstructorOptions, socke
 
                 DISPATCH_INSTALL_LOCK = true;
 
-                for (const dispatcher of v)
+                for (const dispatcher of v) {
+
+                    Object.defineProperty(
+                        dispatcher,
+                        "cwd",
+                        {
+                            configurable: false,
+                            writable: false,
+                            enumerable: true,
+                            value: options.cwd,
+                        }
+                    );
+
                     if (typeof dispatcher.init == "function")
                         dispatcher.init(lantern, dispatcher);
+                }
+
 
                 AddDispatch(log_queue, DispatchMap, DispatchDefaultMap, ...v);
 

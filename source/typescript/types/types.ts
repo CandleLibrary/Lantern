@@ -193,6 +193,8 @@ export interface Dispatcher {
      * e.g. Use this function to register new extension types through `server.addExtension(extension_name)`
      */
     init?: (lantern: LanternServer<any>, dispatcher: this) => void;
+
+    cwd: string;
 }
 
 

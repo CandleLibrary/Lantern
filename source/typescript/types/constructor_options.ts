@@ -1,6 +1,12 @@
 import URL from "@candlelib/uri";
 export interface LanternConstructorOptions {
     /**
+     * The root of the directory tree from which lantern
+     * will serve files 
+     */
+    cwd?: string;
+
+    /**
      * The type of protocol to use with the server.
      */
     type?: "http" | "https" | "http2" | "http2s";

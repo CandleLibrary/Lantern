@@ -83,7 +83,8 @@ const lantern: LanternConstructor = Object.assign(async function (
                 host: "localhost",
                 secure: null,
                 server_name: "Local HTTP Server",
-                log: console.log
+                log: console.log,
+                cwd: process.cwd()
             },
             (FOUND && _pkg["@lantern"]) || {},
             config_options
@@ -118,7 +119,16 @@ const lantern: LanternConstructor = Object.assign(async function (
             }
         };
 
-    return tool_set.createServer(options, responseFunction);
+
+
+
+    const server = await tool_set.createServer(options, responseFunction);
+
+    process.on("SIGINT", () => {
+        server.server.close();
+    });
+
+    return server;
 }, {
     mock_certificate,
     getUnusedPort,
