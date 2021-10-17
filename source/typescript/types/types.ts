@@ -194,7 +194,7 @@ export interface Dispatcher {
      */
     init?: (lantern: LanternServer<any>, dispatcher: this) => void;
 
-    cwd: string;
+    cwd?: string;
 }
 
 
