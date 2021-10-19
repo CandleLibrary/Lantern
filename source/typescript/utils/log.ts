@@ -72,7 +72,7 @@ export class Logger {
         return this;
     }
     sub_message(...v) {
-        this.messages.push(...(v.map(v => (<any>{ level: "log", str: v + "" }))));
+        this.messages.push(...(v.map(v => (<any>{ level: "dbg", str: v + "" }))));
         return this;
     }
     sub_error(...v) {

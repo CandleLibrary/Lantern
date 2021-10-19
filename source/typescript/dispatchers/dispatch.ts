@@ -149,7 +149,7 @@ dispatcher.default = async function (code, tool_set, request_data: RequestData, 
 
     let dispatch_object = DispatchMap.get(extended_key) || DispatchMap.get(base_key) || default_dispatch;
 
-    local_log.message(`Responding to request for "${url}" with code ${code}, using default dispatcher [${dispatch_object.name}]`);
+    local_log.debug(`Responding to request for "${url}" with code ${code}, using debug debug [${dispatch_object.name}]`);
 
     const result = await respond([dispatch_object], tool_set, request_data, local_log);
 
