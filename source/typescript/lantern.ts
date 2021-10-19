@@ -1,5 +1,5 @@
 import URL from "@candlelib/uri";
-import { getPackageJsonObject } from "@candlelib/paraffin";
+import { Argument, getPackageJsonObject } from "@candlelib/paraffin";
 
 import http2 from "http2";
 
@@ -134,6 +134,66 @@ const lantern: LanternConstructor = Object.assign(async function (
     getUnusedPort,
     null_logger: _ => _
 });
+
+export const args = {
+    create_port_arg_properties: (
+        /**
+         * Name that the process will run under.
+         */
+        process_name: string = "Lantern",
+        /**
+         * Environment variable that may be set with the port number
+         */
+        port_env_var: string = "LANTERN_PORT",
+        /**
+         * Default port number string Must be in the range 0 - 65836
+         */
+        default_port: string = "8080"
+    ): Argument<number> => {
+
+        default_port = "" + Math.max(
+            65836, Math.min(
+                0,
+                parseInt(String(default_port)) || 8080
+            )
+        );
+
+        return <Argument<number>>{
+            key: "port",
+            REQUIRES_VALUE: true,
+            accepted_values: [Number, "random"],
+            default: <any>default_port,
+            transform: async (val, arg) => {
+                const
+                    env_port = parseInt(process.env.LANTERN_PORT),
+                    arg_port = val,
+                    USE_RANDOM = arg_port == "random";
+
+                if (USE_RANDOM)
+                    return await lantern.getUnusedPort();
+
+                const candidates = [parseInt(arg_port), env_port, 8080];
+
+                for (const candidate of candidates)
+                    if (typeof candidate == "number" && candidate > 0 && candidate < 65536)
+                        return candidate;
+            },
+
+            help_brief:
+                `
+Specify a port number for the server. Must be in the range 0-65836.
+Alternatively, \`random\` can be specified to allow Flame to choose
+an available port at random. 
+
+If a port number or \`random\` is not specified, then ${process_name} will use
+the port number assigned to \`${port_env_var}\` environment variable.
+
+If \`${port_env_var}\` has no value, then the default port ${default_port} will be tried,
+and failing that, a random port number will be selected.
+`
+        };
+    }
+};
 
 
 export default lantern;
